@@ -1,1 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aaron Austin C. Amaro — BS Computer Science Student at University of Caloocan City. Personal portfolio and contact information.">
+  <title>Aaron Austin C. Amaro | Portfolio</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
 
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="navbar__brand" id="nav-brand">Aaron Amaro</a>
+    <ul class="navbar__links" id="nav-links">
+      <li><a href="#bio">Bio</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="navbar__icons">
+      <button class="navbar__icon-btn" id="search-btn" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor"><path d="M416 208c0 45.9-14.9 88.3-40 122.7l126.6 126.7c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0s208 93.1 208 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+      </button>
+      <button class="mobile-menu-btn" id="menu-toggle" aria-label="Toggle menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main">
+
+    <!-- Hero / Profile Section -->
+    <section class="hero" id="bio">
+      <!-- Left: Profile -->
+      <div class="profile">
+        <div class="profile__avatar-wrapper">
+          <div class="profile__avatar" id="avatar-container">
+            <!-- JS will inject either an <img> or a fallback SVG here -->
+          </div>
+          <span class="profile__badge">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>
+          </span>
+        </div>
+        <h1 class="profile__name" id="profile-name"></h1>
+        <p class="profile__title" id="profile-title"></p>
+        <p class="profile__org" id="profile-org"></p>
+
+        <!-- Social Icons — rendered by JS -->
+        <div class="social-icons" id="social-icons"></div>
+
+        <!-- Download CV -->
+        <a href="#" class="btn-cv" id="download-cv">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M256 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 210.7-41.4-41.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0l96-96c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 242.7 256 32zM64 320c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-46.9 0-56.6 56.6c-31.2 31.2-81.9 31.2-113.1 0L110.9 320 64 320zm304 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg>
+          Download CV
+        </a>
+      </div>
+
+      <!-- Right: Professional Summary -->
+      <div class="details">
+        <div class="section-header">
+          <div class="section-header__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8 16 482.3 16 498.7 29.3 512 45.7 512l356.6 0c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3l-59.4 0z"/></svg>
+          </div>
+          <h2>Professional Summary</h2>
+        </div>
+        <p class="summary-text" id="summary-text"></p>
+      </div>
+    </section>
+
+    <!-- Education Section -->
+    <section class="education" id="education">
+      <div class="section-header">
+        <div class="section-header__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M48 195.8l209.2 86.1c9.8 4 20.2 6.1 30.8 6.1s21-2.1 30.8-6.1l242.4-99.8c9-3.7 14.8-12.4 14.8-22.1s-5.8-18.4-14.8-22.1L318.8 38.1C309 34.1 298.6 32 288 32s-21 2.1-30.8 6.1L14.8 137.9C5.8 141.6 0 150.3 0 160L0 456c0 13.3 10.7 24 24 24s24-10.7 24-24l0-260.2zm48 71.7L96 384c0 53 86 96 192 96s192-43 192-96l0-116.6-142.9 58.9c-15.6 6.4-32.2 9.7-49.1 9.7s-33.5-3.3-49.1-9.7L96 267.4z"/></svg>
+        </div>
+        <h2>Education</h2>
+      </div>
+      <div class="edu-cards" id="edu-cards">
+        <!-- JS will render education cards here -->
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="education" id="projects" style="margin-top: 40px;">
+      <div class="section-header">
+        <div class="section-header__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L238.4 51.2C232.4 43 222.9 38.4 212.8 38.4H64c-35.3 0-64 28.7-64 64V416c0 35.3 28.7 64 64 64z"/></svg>
+        </div>
+        <h2>Projects</h2>
+      </div>
+      <div class="edu-cards" id="project-cards">
+        <!-- JS will render project cards or placeholder -->
+      </div>
+    </section>
+
+    <!-- Certificates Section -->
+    <section class="education" id="certificates" style="margin-top: 40px; display: none;">
+      <div class="section-header">
+        <div class="section-header__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M211 7.3C205 1 196-1.4 187.6 .8s-14.9 8.9-17.1 17.3L154.7 80.6l-62-17.5c-8.4-2.4-17.4 0-23.5 6.1s-8.5 15.1-6.1 23.5l17.5 62L18.1 170.6c-8.4 2.2-15 8.7-17.3 17.1S1 205 7.3 211l46.2 45L7.3 301C1 307-1.4 316 .8 324.4s8.9 14.9 17.3 17.1l62.5 15.8-17.5 62c-2.4 8.4 0 17.4 6.1 23.5s15.1 8.5 23.5 6.1l62-17.5 15.8 62.5c2.2 8.4 8.7 15 17.1 17.3s17.3-.2 23.4-6.4l45-46.2 45 46.2c6.1 6.2 15 8.7 23.4 6.4s14.9-8.9 17.1-17.3l15.8-62.5 62 17.5c8.4 2.4 17.4 0 23.5-6.1s8.5-15.1 6.1-23.5l-17.5-62 62.5-15.8c8.4-2.2 15-8.7 17.3-17.1s-.2-17.3-6.4-23.4l-46.2-45 46.2-45c6.2-6.1 8.7-15 6.4-23.4s-8.9-14.9-17.3-17.1l-62.5-15.8 17.5-62c2.4-8.4 0-17.4-6.1-23.5s-15.1-8.5-23.5-6.1l-62 17.5L341.4 18.1c-2.2-8.4-8.7-15-17.1-17.3S307 1 301 7.3L256 53.5 211 7.3z"/></svg>
+        </div>
+        <h2>Certificates</h2>
+      </div>
+      <div class="edu-cards" id="cert-cards">
+        <!-- JS will render certificate cards here -->
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+      <div class="section-header">
+        <div class="section-header__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M48 64c-26.5 0-48 21.5-48 48 0 15.1 7.1 29.3 19.2 38.4l208 156c17.1 12.8 40.5 12.8 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48L48 64zM0 196L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-188-198.4 148.8c-34.1 25.6-81.1 25.6-115.2 0L0 196z"/></svg>
+        </div>
+        <h2>Contact</h2>
+      </div>
+      <div class="contact-grid" id="contact-grid">
+        <!-- JS will render contact cards here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" id="footer">
+    <!-- JS will inject footer text -->
+  </footer>
+
+  <!-- ===== Scripts ===== -->
+  <script src="config.js"></script>
+  <script>
+    // ── Utility: create an SVG element from path data ────────
+    function svgIcon(pathData, viewBox = "0 0 512 512") {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", viewBox);
+      svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p.setAttribute("d", pathData);
+      svg.appendChild(p);
+      return svg;
+    }
+
+    // ── Render portfolio from CONFIG ─────────────────────────
+    (function init() {
+      const C = CONFIG;
+
+      // Page title
+      document.title = `${C.name} | Portfolio`;
+
+      // Navbar brand
+      const brand = document.getElementById("nav-brand");
+      brand.textContent = C.name.split(" ").slice(0, 2).join(" ");
+
+      // Avatar
+      const avatarContainer = document.getElementById("avatar-container");
+      if (C.avatar) {
+        const img = document.createElement("img");
+        img.src = C.avatar;
+        img.alt = C.name;
+        avatarContainer.appendChild(img);
+      } else {
+        // Default user silhouette
+        const fallback = svgIcon(
+          "M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8 16 482.3 16 498.7 29.3 512 45.7 512l356.6 0c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3l-59.4 0z",
+          "0 0 448 512"
+        );
+        avatarContainer.appendChild(fallback);
+      }
+
+      // Name, title, org
+      document.getElementById("profile-name").textContent = C.name;
+      document.getElementById("profile-title").textContent = C.title;
+      document.getElementById("profile-org").textContent = C.organization;
+
+      // Summary
+      document.getElementById("summary-text").textContent = C.summary;
+
+      // Social icons
+      const socialContainer = document.getElementById("social-icons");
+      C.socials.forEach(s => {
+        const a = document.createElement("a");
+        a.href = s.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.className = "social-icon";
+        a.setAttribute("aria-label", s.platform);
+        a.title = s.platform;
+        a.appendChild(svgIcon(s.path, s.viewBox));
+        socialContainer.appendChild(a);
+      });
+
+      // Download CV
+      const cvBtn = document.getElementById("download-cv");
+      if (C.cvLink) {
+        cvBtn.href = C.cvLink;
+        cvBtn.target = "_blank";
+        cvBtn.rel = "noopener noreferrer";
+      } else {
+        cvBtn.style.opacity = "0.5";
+        cvBtn.style.cursor = "default";
+        cvBtn.title = "CV coming soon";
+        cvBtn.addEventListener("click", e => e.preventDefault());
+      }
+
+      // Education cards
+      const eduContainer = document.getElementById("edu-cards");
+      const gradCapPath = "M48 195.8l209.2 86.1c9.8 4 20.2 6.1 30.8 6.1s21-2.1 30.8-6.1l242.4-99.8c9-3.7 14.8-12.4 14.8-22.1s-5.8-18.4-14.8-22.1L318.8 38.1C309 34.1 298.6 32 288 32s-21 2.1-30.8 6.1L14.8 137.9C5.8 141.6 0 150.3 0 160L0 456c0 13.3 10.7 24 24 24s24-10.7 24-24l0-260.2zm48 71.7L96 384c0 53 86 96 192 96s192-43 192-96l0-116.6-142.9 58.9c-15.6 6.4-32.2 9.7-49.1 9.7s-33.5-3.3-49.1-9.7L96 267.4z";
+      C.education.forEach(ed => {
+        const card = document.createElement("div");
+        card.className = "edu-card";
+        const iconWrap = document.createElement("div");
+        iconWrap.className = "edu-card__icon";
+        iconWrap.appendChild(svgIcon(gradCapPath, "0 0 576 512"));
+        const title = document.createElement("p");
+        title.className = "edu-card__title";
+        title.textContent = ed.degree;
+        const sub = document.createElement("p");
+        sub.className = "edu-card__subtitle";
+        sub.textContent = ed.school;
+        card.append(iconWrap, title, sub);
+        eduContainer.appendChild(card);
+      });
+
+      // Projects
+      const projectContainer = document.getElementById("project-cards");
+      if (C.projects.length === 0) {
+        const placeholder = document.createElement("div");
+        placeholder.className = "edu-card";
+        placeholder.style.color = "var(--text-muted)";
+        placeholder.style.fontStyle = "italic";
+        placeholder.innerHTML = "<p>Projects coming soon — stay tuned! 🚀</p>";
+        projectContainer.appendChild(placeholder);
+      } else {
+        C.projects.forEach(proj => {
+          const card = document.createElement("div");
+          card.className = "edu-card";
+          const title = document.createElement("p");
+          title.className = "edu-card__title";
+          title.textContent = proj.title;
+          const desc = document.createElement("p");
+          desc.className = "edu-card__subtitle";
+          desc.textContent = proj.description;
+          card.append(title, desc);
+          if (proj.url) {
+            card.style.cursor = "pointer";
+            card.addEventListener("click", () => window.open(proj.url, "_blank"));
+          }
+          projectContainer.appendChild(card);
+        });
+      }
+
+      // Certificates
+      const certSection = document.getElementById("certificates");
+      const certContainer = document.getElementById("cert-cards");
+      if (C.certificates.length > 0) {
+        certSection.style.display = "";
+        C.certificates.forEach(cert => {
+          const card = document.createElement("div");
+          card.className = "edu-card";
+          if (cert.imageUrl) {
+            const img = document.createElement("img");
+            img.src = cert.imageUrl;
+            img.alt = cert.title;
+            img.style.width = "100%";
+            img.style.borderRadius = "8px";
+            img.style.marginBottom = "10px";
+            card.appendChild(img);
+          }
+          const title = document.createElement("p");
+          title.className = "edu-card__title";
+          title.textContent = cert.title;
+          card.appendChild(title);
+          certContainer.appendChild(card);
+        });
+      }
+
+      // Contact cards
+      const contactGrid = document.getElementById("contact-grid");
+      // Email
+      const emailCard = document.createElement("a");
+      emailCard.href = `mailto:${C.email}`;
+      emailCard.className = "contact-card";
+      emailCard.id = "contact-email";
+      emailCard.innerHTML = `
+        <div class="contact-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M48 64c-26.5 0-48 21.5-48 48 0 15.1 7.1 29.3 19.2 38.4l208 156c17.1 12.8 40.5 12.8 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48L48 64zM0 196L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-188-198.4 148.8c-34.1 25.6-81.1 25.6-115.2 0L0 196z"/></svg>
+        </div>
+        <div>
+          <p class="contact-card__label">Email</p>
+          <p class="contact-card__value">${C.email}</p>
+        </div>`;
+      contactGrid.appendChild(emailCard);
+
+      // Phone
+      const phoneCard = document.createElement("a");
+      phoneCard.href = `tel:${C.phone}`;
+      phoneCard.className = "contact-card";
+      phoneCard.id = "contact-phone";
+      phoneCard.innerHTML = `
+        <div class="contact-card__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M160.2 25C152.3 6.1 131.7-3.9 112.1 1.4l-5.5 1.5c-64.6 17.6-119.8 80.2-103.7 156.4 37.1 175 174.8 312.7 349.8 349.8 76.3 16.2 138.8-39.1 156.4-103.7l1.5-5.5c5.4-19.7-4.7-40.3-23.5-48.1l-97.3-40.5c-16.5-6.9-35.6-2.1-47 11.8l-38.6 47.2C233.9 335.4 177.3 277 144.8 205.3L189 169.3c13.9-11.3 18.6-30.4 11.8-47L160.2 25z"/></svg>
+        </div>
+        <div>
+          <p class="contact-card__label">Phone</p>
+          <p class="contact-card__value">${C.phoneDisplay}</p>
+        </div>`;
+      contactGrid.appendChild(phoneCard);
+
+      // Footer
+      const footer = document.getElementById("footer");
+      footer.innerHTML = `<p>&copy; ${new Date().getFullYear()} <a href="${C.socials.find(s => s.platform === 'GitHub')?.url || '#'}" target="_blank" rel="noopener noreferrer">${C.name}</a>. All rights reserved.</p>`;
+
+      // ── Mobile menu toggle ──────────────────────────────────
+      document.getElementById("menu-toggle").addEventListener("click", () => {
+        document.getElementById("nav-links").classList.toggle("active");
+      });
+      document.querySelectorAll("#nav-links a").forEach(link => {
+        link.addEventListener("click", () => {
+          document.getElementById("nav-links").classList.remove("active");
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
