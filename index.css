@@ -487,8 +487,8 @@ img { max-width: 100%; display: block; }
 
 .edu-cards {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .edu-card {
@@ -534,98 +534,116 @@ img { max-width: 100%; display: block; }
   color: var(--text-muted);
 }
 
-/* ===== Certificate Preview Cards ===== */
-#cert-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.cert-preview-card {
+/* ===== Certificate Cards ===== */
+.cert-card {
   display: flex;
   flex-direction: column;
   background: var(--card-bg);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  border-radius: var(--radius);
   text-decoration: none;
   color: var(--text-primary);
-  border: 1px solid rgba(200, 180, 220, 0.2);
   transition: all var(--transition);
   cursor: pointer;
+  overflow: hidden;
+  border: 1px solid rgba(200, 180, 220, 0.2);
 }
 
-.cert-preview-card:hover {
+.cert-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
   border-color: var(--accent);
 }
 
-.cert-preview-card__thumb {
-  position: relative;
+.cert-card__preview {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4/3;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.05); /* placeholder background while loading */
+  background: var(--accent-soft);
+  position: relative;
 }
 
-.cert-preview-card__thumb img {
+.cert-card__preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform var(--transition);
 }
 
-.cert-preview-card:hover .cert-preview-card__thumb img {
-  transform: scale(1.05);
-}
-
-.cert-preview-card__overlay {
+.cert-card__overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 12, 41, 0.65);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity var(--transition);
+  gap: 8px;
   color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+  backdrop-filter: blur(2px);
 }
 
-.cert-preview-card:hover .cert-preview-card__overlay {
-  opacity: 1;
-}
-
-.cert-preview-card__overlay svg {
-  width: 32px;
-  height: 32px;
+.cert-card__overlay svg {
+  width: 28px;
+  height: 28px;
   fill: #fff;
-  margin-bottom: 8px;
 }
 
-.cert-preview-card__overlay span {
+.cert-card__overlay span {
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.cert-preview-card__info {
+.cert-card:hover .cert-card__preview img {
+  transform: scale(1.05);
+}
+
+.cert-card:hover .cert-card__overlay {
+  opacity: 1;
+}
+
+.cert-card__body {
   padding: 16px;
   display: flex;
   align-items: center;
-  background: var(--card-bg);
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.cert-preview-card__title {
-  font-size: 0.9rem;
+.cert-card__title {
+  font-size: 0.92rem;
   font-weight: 600;
-  line-height: 1.4;
   color: var(--text-primary);
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.cert-card__arrow {
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.cert-card__arrow svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--accent);
+}
+
+.cert-card:hover .cert-card__arrow {
+  opacity: 1;
+  transform: translateX(2px) translateY(-2px);
 }
 
 /* ===== Footer ===== */
@@ -660,22 +678,28 @@ img { max-width: 100%; display: block; }
 .footer__contact-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.88rem;
+  gap: 8px;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   transition: color var(--transition);
+  text-decoration: none;
 }
 
 .footer__contact-link svg {
-  width: 14px;
-  height: 14px;
-  fill: var(--accent);
+  width: 16px;
+  height: 16px;
+  fill: var(--text-muted);
   flex-shrink: 0;
+  transition: fill var(--transition);
 }
 
 .footer__contact-link:hover {
   color: var(--accent);
+}
+
+.footer__contact-link:hover svg {
+  fill: var(--accent);
 }
 
 .footer__separator {

@@ -59,15 +59,18 @@ const CONFIG = {
   certificates: [
     {
       title: "Automate or Stagnate: Building Intelligent Workflows",
-      url: "https://drive.google.com/file/d/1F44xjqrnuwReWsG6estmy3Wg5LI7aePr/view?usp=sharing"
+      url: "https://drive.google.com/file/d/1F44xjqrnuwReWsG6estmy3Wg5LI7aePr/view?usp=sharing",
+      imageUrl: "https://lh3.googleusercontent.com/d/1F44xjqrnuwReWsG6estmy3Wg5LI7aePr"
     },
     {
       title: "Coursera Google Certificate: Cybersecurity",
-      url: "https://drive.google.com/file/d/1i0ay-Ex7-b3lNjhQjGFuW4WnoVbus1aW/view?usp=sharing"
+      url: "https://drive.google.com/file/d/1i0ay-Ex7-b3lNjhQjGFuW4WnoVbus1aW/view?usp=sharing",
+      imageUrl: "https://lh3.googleusercontent.com/d/1i0ay-Ex7-b3lNjhQjGFuW4WnoVbus1aW"
     },
     {
       title: "Web Deployment E-Certificate",
-      url: "https://drive.google.com/file/d/1_8ywRGn3Stjs7Jz7rEQprVIFdpaU60KL/view?usp=sharing"
+      url: "https://drive.google.com/file/d/1_8ywRGn3Stjs7Jz7rEQprVIFdpaU60KL/view?usp=sharing",
+      imageUrl: "https://lh3.googleusercontent.com/d/1_8ywRGn3Stjs7Jz7rEQprVIFdpaU60KL"
     }
   ],
 

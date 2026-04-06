@@ -226,44 +226,48 @@
       } else {
         C.certificates.forEach(cert => {
           const card = document.createElement("a");
-          card.className = "cert-preview-card";
+          card.className = "cert-card";
           card.href = cert.url;
           card.target = "_blank";
           card.rel = "noopener noreferrer";
 
-          // Extract Drive file ID to build thumbnail URL
-          let fileId = "";
-          const match = cert.url.match(/\/d\/(.*?)\//);
-          if (match && match[1]) fileId = match[1];
-          // Fallback if it's already a direct link or ID
-          else fileId = cert.url;
+          // Preview Image
+          const preview = document.createElement("div");
+          preview.className = "cert-card__preview";
+          if (cert.imageUrl) {
+            const img = document.createElement("img");
+            img.src = cert.imageUrl;
+            img.alt = cert.title;
+            img.referrerPolicy = "no-referrer";
+            img.loading = "lazy";
+            preview.appendChild(img);
+            
+            // Hover Overlay
+            const overlay = document.createElement("div");
+            overlay.className = "cert-card__overlay";
+            overlay.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 92.9-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.8-35.7-46.1-87.7-92.9-131.1C433.5 68.8 368.8 32 288 32zM128 256a160 160 0 1 1 320 0 160 160 0 1 1 -320 0zm160 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"/></svg><span>View It</span>';
+            preview.appendChild(overlay);
+          } else {
+            // Fallback icon
+            preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><svg style="width:40px;height:40px;fill:var(--accent);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg></div>';
+          }
 
-          // Thumbnail image
-          const thumbWrap = document.createElement("div");
-          thumbWrap.className = "cert-preview-card__thumb";
-          const img = document.createElement("img");
-          // Request a larger thumbnail (w800) for sharp previews
-          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
-          img.alt = cert.title;
-          img.referrerPolicy = "no-referrer";
-          thumbWrap.appendChild(img);
+          // Card Body (Title & Arrow)
+          const body = document.createElement("div");
+          body.className = "cert-card__body";
 
-          // Dark overlay with view icon on hover
-          const overlay = document.createElement("div");
-          overlay.className = "cert-preview-card__overlay";
-          overlay.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 92.9-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.8-35.7-46.1-87.7-92.9-131.1C433.5 68.8 368.8 32 288 32zM128 256a160 160 0 1 1 320 0 160 160 0 1 1 -320 0zm160-80a80 80 0 1 0 0 160 80 80 0 1 0 0-160z"/></svg><span>View Certificate</span>';
-          thumbWrap.appendChild(overlay);
-
-          // Title
-          const titleWrap = document.createElement("div");
-          titleWrap.className = "cert-preview-card__info";
-          const title = document.createElement("p");
-          title.className = "cert-preview-card__title";
+          const title = document.createElement("span");
+          title.className = "cert-card__title";
           title.textContent = cert.title;
-          titleWrap.appendChild(title);
 
-          card.append(thumbWrap, titleWrap);
+          const arrow = document.createElement("span");
+          arrow.className = "cert-card__arrow";
+          arrow.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M320 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l82.7 0L201.4 265.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L448 109.3l0 82.7c0 17.7 14.3 32 32 32s32-14.3 32-32l0-160c0-17.7-14.3-32-32-32L320 0zM80 32C35.8 32 0 67.8 0 112L0 432c0 44.2 35.8 80 80 80l320 0c44.2 0 80-35.8 80-80l0-160c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 160c0 8.8-7.2 16-16 16L80 448c-8.8 0-16-7.2-16-16l0-320c0-8.8 7.2-16 16-16l160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L80 32z"/></svg>';
+
+          body.append(title, arrow);
+          card.append(preview, body);
           certContainer.appendChild(card);
+
         });
       }
 
