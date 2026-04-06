@@ -197,18 +197,8 @@ img { max-width: 100%; display: block; }
   grid-template-columns: 260px 1fr;
   gap: 48px;
   align-items: start;
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius);
-  padding: 48px;
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(200, 180, 220, 0.2);
-  transition: box-shadow var(--transition);
+  padding: 48px 0;
   animation: fadeInUp 0.7s ease;
-}
-
-.hero:hover {
-  box-shadow: var(--card-shadow-hover);
 }
 
 @keyframes fadeInUp {
@@ -476,12 +466,7 @@ img { max-width: 100%; display: block; }
 /* ===== Section Card (Projects, Certificates) ===== */
 .section-card {
   margin-top: 40px;
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius);
-  padding: 36px 40px;
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(200, 180, 220, 0.2);
+  padding: 36px 0;
   animation: fadeInUp 0.7s ease 0.2s backwards;
 }
 
