@@ -225,22 +225,44 @@
         certContainer.appendChild(placeholder);
       } else {
         C.certificates.forEach(cert => {
-          const card = document.createElement("div");
-          card.className = "edu-card";
-          if (cert.imageUrl) {
-            const img = document.createElement("img");
-            img.src = cert.imageUrl;
-            img.alt = cert.title;
-            img.referrerPolicy = "no-referrer";
-            img.style.width = "100%";
-            img.style.borderRadius = "8px";
-            img.style.marginBottom = "10px";
-            card.appendChild(img);
-          }
+          const card = document.createElement("a");
+          card.className = "cert-preview-card";
+          card.href = cert.url;
+          card.target = "_blank";
+          card.rel = "noopener noreferrer";
+
+          // Extract Drive file ID to build thumbnail URL
+          let fileId = "";
+          const match = cert.url.match(/\/d\/(.*?)\//);
+          if (match && match[1]) fileId = match[1];
+          // Fallback if it's already a direct link or ID
+          else fileId = cert.url;
+
+          // Thumbnail image
+          const thumbWrap = document.createElement("div");
+          thumbWrap.className = "cert-preview-card__thumb";
+          const img = document.createElement("img");
+          // Request a larger thumbnail (w800) for sharp previews
+          img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+          img.alt = cert.title;
+          img.referrerPolicy = "no-referrer";
+          thumbWrap.appendChild(img);
+
+          // Dark overlay with view icon on hover
+          const overlay = document.createElement("div");
+          overlay.className = "cert-preview-card__overlay";
+          overlay.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 92.9-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.8-35.7-46.1-87.7-92.9-131.1C433.5 68.8 368.8 32 288 32zM128 256a160 160 0 1 1 320 0 160 160 0 1 1 -320 0zm160-80a80 80 0 1 0 0 160 80 80 0 1 0 0-160z"/></svg><span>View Certificate</span>';
+          thumbWrap.appendChild(overlay);
+
+          // Title
+          const titleWrap = document.createElement("div");
+          titleWrap.className = "cert-preview-card__info";
           const title = document.createElement("p");
-          title.className = "edu-card__title";
+          title.className = "cert-preview-card__title";
           title.textContent = cert.title;
-          card.appendChild(title);
+          titleWrap.appendChild(title);
+
+          card.append(thumbWrap, titleWrap);
           certContainer.appendChild(card);
         });
       }
@@ -248,14 +270,18 @@
       // Footer — Contact + Copyright
       const footerContact = document.getElementById("footer-contact");
       footerContact.innerHTML = `
-        <a href="mailto:${C.email}" class="footer__link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M48 64c-26.5 0-48 21.5-48 48 0 15.1 7.1 29.3 19.2 38.4l208 156c17.1 12.8 40.5 12.8 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48L48 64zM0 196L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-188-198.4 148.8c-34.1 25.6-81.1 25.6-115.2 0L0 196z"/></svg>
-          ${C.email}
-        </a>
-        <a href="tel:${C.phone}" class="footer__link">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M160.2 25C152.3 6.1 131.7-3.9 112.1 1.4l-5.5 1.5c-64.6 17.6-119.8 80.2-103.7 156.4 37.1 175 174.8 312.7 349.8 349.8 76.3 16.2 138.8-39.1 156.4-103.7l1.5-5.5c5.4-19.7-4.7-40.3-23.5-48.1l-97.3-40.5c-16.5-6.9-35.6-2.1-47 11.8l-38.6 47.2C233.9 335.4 177.3 277 144.8 205.3L189 169.3c13.9-11.3 18.6-30.4 11.8-47L160.2 25z"/></svg>
-          ${C.phoneDisplay}
-        </a>
+        <p class="footer__heading">Get in Touch</p>
+        <div class="footer__links-row">
+          <a href="mailto:${C.email}" class="footer__contact-link">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M48 64c-26.5 0-48 21.5-48 48 0 15.1 7.1 29.3 19.2 38.4l208 156c17.1 12.8 40.5 12.8 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48L48 64zM0 196L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-188-198.4 148.8c-34.1 25.6-81.1 25.6-115.2 0L0 196z"/></svg>
+            ${C.email}
+          </a>
+          <span class="footer__separator">•</span>
+          <a href="tel:${C.phone}" class="footer__contact-link">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M160.2 25C152.3 6.1 131.7-3.9 112.1 1.4l-5.5 1.5c-64.6 17.6-119.8 80.2-103.7 156.4 37.1 175 174.8 312.7 349.8 349.8 76.3 16.2 138.8-39.1 156.4-103.7l1.5-5.5c5.4-19.7-4.7-40.3-23.5-48.1l-97.3-40.5c-16.5-6.9-35.6-2.1-47 11.8l-38.6 47.2C233.9 335.4 177.3 277 144.8 205.3L189 169.3c13.9-11.3 18.6-30.4 11.8-47L160.2 25z"/></svg>
+            ${C.phoneDisplay}
+          </a>
+        </div>
       `;
 
       const footerCopy = document.getElementById("footer-copy");
