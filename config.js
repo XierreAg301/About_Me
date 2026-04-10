@@ -12,7 +12,7 @@ const CONFIG = {
   universityLogo: "https://lh3.googleusercontent.com/d/1yjmrJoOXJcNG5A9jOffb1Z8uKx7D44Hb",
 
   // Brief paragraph shown in the "Professional Summary" card.
-  summary: `Aaron Austin C. Amaro is a dedicated Bachelor of Science in Computer Science student at the University of Caloocan City. With a passion for technology and software development, Aaron is continuously building skills in programming, web development, and problem-solving. He is eager to learn, collaborate, and contribute to meaningful projects that push the boundaries of what technology can achieve. Outside academics, Aaron enjoys exploring new tools, contributing to open-source projects, and staying up-to-date with the latest in computer science.`,
+  summary: `Aaron Austin C. Amaro is a dedicated student at the University of Caloocan City, specializing in full-stack development, AI agent development, and cybersecurity. With a passion for building robust software, Aaron is continuously expanding his technical skill set, focusing on game engine mechanics using Unity and p5.js, backend cloud integrations, and system architecture design. He is eager to collaborate within development teams, contribute to impactful projects, and bridge the gap between academic learning and real-world application. Outside formal academics, Aaron enjoys optimizing coding workflows using advanced AI models, mastering version control systems, and applying strategic problem-solving to complex technical challenges.`,
 
   // ── Social Links ────────────────────────────────────────────
   socials: [
@@ -78,5 +78,5 @@ const CONFIG = {
   projects: [],
 
 
-  resumeLink: null
+  resumeLink: "https://docs.google.com/document/d/1AM7y768XhlLBhpUdXyKJ0jTupsw81RwWdhvXz19u3yI/edit?usp=sharing"
 };
