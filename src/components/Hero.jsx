@@ -91,7 +91,7 @@ export default function Hero() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3 leading-tight">
               {CONFIG.name.split(' ').slice(0, 2).join(' ')}
               <br />
-              <span className="text-matrix-green border-r-2 border-matrix-green pr-2">{CONFIG.name.split(' ').slice(2).join(' ')}</span>
+              <span className="text-matrix-green">{CONFIG.name.split(' ').slice(2).join(' ')}</span>
             </h1>
 
             {/* Typing effect */}
