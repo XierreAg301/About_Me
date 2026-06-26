@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 // Global event to trigger bursts when transitioning sections
+// eslint-disable-next-line react-refresh/only-export-components
 export const triggerParticleBurst = () => {
   window.dispatchEvent(new CustomEvent('particle-burst'));
 };
@@ -62,12 +63,7 @@ export default function ParticleField() {
     resize();
     init();
 
-    let lastTime = performance.now();
-
     const draw = (time) => {
-      const dt = Math.min((time - lastTime) / 1000, 0.05);
-      lastTime = time;
-
       // Decay burst multiplier smoothly
       burstMultiplier.current += (1 - burstMultiplier.current) * 0.05;
 

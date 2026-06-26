@@ -382,3 +382,90 @@ img { max-width: 100%; display: block; }
 .animate-slide-left {
   animation: slideLeft 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+/* ===================================================
+   INTRO END-CARD
+   =================================================== */
+.intro-end-card {
+  animation: introEndCardFade 0.55s ease-out both;
+}
+
+.intro-end-takeover {
+  background:
+    radial-gradient(circle at 52% 46%, rgba(117, 23, 16, 0.72) 0%, rgba(23, 3, 2, 0.94) 43%, rgba(0, 0, 0, 0.99) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.88));
+  animation: introEndTakeover 0.7s ease-out both;
+}
+
+.intro-end-halo {
+  background:
+    radial-gradient(circle, rgba(255, 98, 57, 0.32) 0%, rgba(224, 46, 92, 0.22) 38%, rgba(0, 0, 0, 0) 70%);
+  animation: introEndHalo 3.4s ease-in-out 0.55s infinite;
+}
+
+.intro-end-scan {
+  background:
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.025) 0deg 1deg, transparent 1deg 7deg),
+    linear-gradient(90deg, transparent, rgba(255, 95, 141, 0.12), transparent);
+  animation: introEndScan 2.8s ease-in-out 0.55s infinite;
+}
+
+.intro-end-lockup {
+  animation: introEndLockupIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.42s both;
+}
+
+.intro-end-logo {
+  animation:
+    introEndLogoIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.48s both,
+    introEndFloat 3s ease-in-out 1.45s infinite;
+}
+
+.intro-end-wordmark {
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 22px rgba(255, 78, 124, 0.24);
+  animation: introEndTextIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.62s both;
+}
+
+.intro-end-tagline {
+  animation: introEndTextIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.75s both;
+}
+
+@keyframes introEndCardFade {
+  from { opacity: 0; }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes introEndTakeover {
+  from { opacity: 0; filter: blur(12px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes introEndHalo {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.88); opacity: 0.68; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+@keyframes introEndScan {
+  0%, 100% { transform: scale(1); opacity: 0.28; }
+  50% { transform: scale(1.18); opacity: 0.48; }
+}
+
+@keyframes introEndLockupIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes introEndLogoIn {
+  from { opacity: 0; transform: translateX(-34px) scale(0.74) rotate(-8deg); }
+  to { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
+}
+
+@keyframes introEndFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes introEndTextIn {
+  from { opacity: 0; transform: translateX(30px); filter: blur(8px); }
+  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}

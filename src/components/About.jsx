@@ -227,8 +227,8 @@ export default function About() {
               </div>
             </div>
 
-            {/* Education */}
-            <div className="reveal-element">
+            {/* Education / Background */}
+            <div id="background" className="reveal-element scroll-mt-24">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-2 rounded-full bg-matrix-cyan" />
                 <h3 className="font-mono text-matrix-cyan/80 text-xs tracking-[0.2em] uppercase">Education</h3>
@@ -262,7 +262,7 @@ export default function About() {
           {/* ── Right Column: Skills + Terminal ── */}
           <div className="space-y-8">
             {/* Categorized skills */}
-            <div className="reveal-element space-y-5">
+            <div id="skills" className="reveal-element space-y-5 scroll-mt-24">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 rounded-full bg-matrix-green" />
                 <h3 className="font-mono text-matrix-green text-xs tracking-[0.2em] uppercase">Tech Stack</h3>

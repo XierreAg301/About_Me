@@ -6,7 +6,7 @@ export default function useScrollCamera() {
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const targetMouseRef = useRef({ x: 0.5, y: 0.5 });
 
-  const onScroll = useCallback((e) => {
+  const onScroll = useCallback(() => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     scrollRef.current = max > 0 ? window.scrollY / max : 0;
   }, []);

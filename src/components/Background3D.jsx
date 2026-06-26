@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 
 const LINES = 14;
@@ -65,7 +65,7 @@ function DriftParticle({ index, mouseRef, scrollRef }) {
     ph: Math.random() * Math.PI * 2,
     size: 0.015 + Math.random() * 0.07,
     color: index % 3 === 0 ? '#00e5ff' : '#00ff41',
-  }), []);
+  }), [index]);
 
   useFrame((state) => {
     if (!ref.current) return;
@@ -99,7 +99,7 @@ function OrbitBand({ index, total, mouseRef, scrollRef }) {
     dashOffset: index * 0.3,
   }), [index, total]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (!ref.current) return;
     const m = mouseRef.current;
     const s = scrollRef.current;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, lazy, Suspense } from 'react';
 import Background3D from './components/Background3D';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -6,6 +6,10 @@ import About from './components/About';
 import Projects from './components/Projects';
 import Certificates from './components/Certificates';
 import Footer from './components/Footer';
+
+// Lazy-load the cinematic intro so its video/markup stay out of the initial bundle.
+const IntroPortal = lazy(() => import('./components/IntroPortal'));
+const INTRO_SEEN_KEY = 'intro_seen_v1';
 
 const sections = [
   { id: 'hero', label: 'Home' },
@@ -51,8 +55,16 @@ function SectionDock({ activeSection }) {
 }
 
 export default function App() {
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState('hero');
+  const [showIntro, setShowIntro] = useState(
+    () => typeof window !== 'undefined' && !sessionStorage.getItem(INTRO_SEEN_KEY)
+  );
+
+  const handleIntroComplete = useCallback(() => {
+    setShowIntro(false);
+    try { sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* storage may be unavailable */ }
+  }, []);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const scrollRef = useRef(0);
   const curtainRef = useRef(null);
@@ -138,6 +150,12 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-matrix-black text-matrix-text overflow-x-hidden">
+
+      {showIntro && (
+        <Suspense fallback={<div className="fixed inset-0 z-[300] bg-matrix-black" />}>
+          <IntroPortal onComplete={handleIntroComplete} />
+        </Suspense>
+      )}
 
       <Background3D mouseRef={mouseRef} scrollRef={scrollRef} />
 

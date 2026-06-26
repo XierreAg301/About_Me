@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * MatrixRain — 3-layer depth system for genuine Z-axis illusion.

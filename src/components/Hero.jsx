@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { CONFIG } from '../../config.js';
 import HeroProfile3D from './HeroProfile3D';
 

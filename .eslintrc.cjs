@@ -8,6 +8,13 @@ module.exports = {
     'plugin:react-hooks/recommended',
   ],
   ignorePatterns: ['dist', 'node_modules', 'Tools', '.eslintrc.cjs'],
+  overrides: [
+    {
+      // Build/tooling configs run in Node, not the browser.
+      files: ['vite.config.js', 'tailwind.config.js', 'postcss.config.js'],
+      env: { node: true },
+    },
+  ],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   settings: { react: { version: '18.2' } },
   plugins: ['react-refresh'],

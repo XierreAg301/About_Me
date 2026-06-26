@@ -1,6 +1,5 @@
-import React, { useRef, useMemo, useState, useCallback } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 const CARD_WIDTH = 1.8;
@@ -27,7 +26,7 @@ function cardTexture(text, color) {
   return new THREE.CanvasTexture(canvas);
 }
 
-function OrbitCard({ index, total, project, activeIndex, setActive, setHovered, hoveredIndex }) {
+function OrbitCard({ index, total, activeIndex, setActive, setHovered, hoveredIndex }) {
   const meshRef = useRef();
   const groupRef = useRef();
   const angle = (index / total) * Math.PI * 2;
@@ -41,7 +40,7 @@ function OrbitCard({ index, total, project, activeIndex, setActive, setHovered, 
     [index, isActive]
   );
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!groupRef.current) return;
     const t = state.clock.elapsedTime;
     const orbitSpeed = 0.15;

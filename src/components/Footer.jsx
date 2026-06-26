@@ -1,4 +1,3 @@
-import React from 'react';
 import { CONFIG } from '../../config.js';
 
 // SVG Icon components (moved from Hero)
@@ -55,7 +54,7 @@ export default function Footer() {
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-matrix-green mb-6">Get In Touch</h2>
           <p className="text-white/80 max-w-lg mx-auto mb-8 leading-relaxed">
-            I'm currently looking for new opportunities. Whether you have a question, a project idea, or just want to say hi — my inbox is always open.
+            I&apos;m currently looking for new opportunities. Whether you have a question, a project idea, or just want to say hi — my inbox is always open.
           </p>
 
           <a

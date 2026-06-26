@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { CONFIG } from '../../config.js';
 import Timeline3DAccent from './Timeline3DAccent';
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
-function TimelineCard({ project, index, isExpanded, onToggle, totalProjects }) {
+function TimelineCard({ project, index, isExpanded, onToggle }) {
   const cardRef = useRef(null);
   const animRef = useRef(null);
   const targetRef = useRef({ rx: 0, ry: 0, glow: 0 });
@@ -154,6 +154,34 @@ function TimelineCard({ project, index, isExpanded, onToggle, totalProjects }) {
           >
             <div className="overflow-hidden">
               <div className="pt-4 border-t border-matrix-border">
+                {/* Screenshots (render only when images are provided in config) */}
+                {Array.isArray(project.images) && project.images.length > 0 && (
+                  <div className={`grid gap-3 mb-4 ${project.images.length > 1 ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
+                    {project.images.map((img, i) => (
+                      <a
+                        key={i}
+                        href={img}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="group/img relative block aspect-[16/10] overflow-hidden rounded-lg border border-matrix-border bg-matrix-darker
+                                 hover:border-matrix-green/40 hover:shadow-[0_4px_20px_rgba(0,255,65,0.15)] transition-all"
+                      >
+                        <img
+                          src={img}
+                          alt={`${project.title} screenshot ${i + 1}`}
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105"
+                        />
+                        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded font-mono text-[9px] tracking-wide bg-matrix-dark/80 text-matrix-green/80 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                          OPEN ↗
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
                 {/* Full tech list */}
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {project.technologies.map((tech, i) => (
@@ -172,6 +200,38 @@ function TimelineCard({ project, index, isExpanded, onToggle, totalProjects }) {
                     </li>
                   ))}
                 </ul>
+
+                {/* Project links (render only when URLs are provided in config) */}
+                {(project.repoUrl || project.demoUrl) && (
+                  <div className="flex flex-wrap gap-3 mt-5">
+                    {project.demoUrl && (
+                      <a
+                        href={project.demoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-[11px] tracking-wide
+                                 bg-matrix-green/10 border border-matrix-green/30 text-matrix-green
+                                 hover:bg-matrix-green/20 hover:shadow-[0_0_12px_rgba(0,255,65,0.25)] transition-all"
+                      >
+                        <span aria-hidden="true">▶</span> Live Demo
+                      </a>
+                    )}
+                    {project.repoUrl && (
+                      <a
+                        href={project.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-[11px] tracking-wide
+                                 bg-matrix-card/60 border border-matrix-border text-white/70
+                                 hover:text-matrix-green hover:border-matrix-green/30 transition-all"
+                      >
+                        <span aria-hidden="true">&lt;/&gt;</span> Source
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

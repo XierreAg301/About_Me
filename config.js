@@ -64,6 +64,14 @@ const CONFIG = {
   ],
 
   // ── Experience / Projects ──────────────────────────────────
+  // Each project may optionally include any of these fields. They render inside
+  // the expanded project card only when present (omit or leave empty to hide):
+  //   images: [                                          // screenshots of the project
+  //     "https://lh3.googleusercontent.com/d/<DRIVE_FILE_ID>",  // Google Drive image (same as certificates)
+  //     "/projects/awcs-1.png",                          // ...or a local file in public/projects/
+  //   ],
+  //   repoUrl: "https://github.com/XierreAg301/<repo>",  // source repository (optional)
+  //   demoUrl: "https://<live-deployment-url>",          // live demo / deployment (optional)
   projects: [
     {
       title: "Procurement and Inventory System",

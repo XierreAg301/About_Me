@@ -1,9 +1,9 @@
-import React, { useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
-function OrbitingGeo({ index, total, scrollRef }) {
+function OrbitingGeo({ scrollRef }) {
   const ref = useRef();
   const data = useMemo(() => ({
     radius: 7 + Math.random() * 8,
