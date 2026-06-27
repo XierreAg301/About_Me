@@ -2,220 +2,370 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { CONFIG } from '../../config.js';
 
 const INTRO_VIDEO_URL = `${import.meta.env.BASE_URL}media/intro.mp4`;
-const TAKEOVER_AT_SECONDS = 6.45;
-const END_CARD_HOLD_MS = 4300;
-const SAFETY_TIMEOUT_MS = 18000;
+const TRANSITION_VIDEO_URL = `${import.meta.env.BASE_URL}media/light-speed-transition.mp4`;
+const TRANSITION_AT_SECONDS = 7;
+const FADE_AT_SECONDS = 8.5;
+const SAFETY_TIMEOUT_MS = 15000;
 
-const BOOT_LINES = [
-  'establishing encrypted uplink...',
-  'spoofing trace route...',
-  'injecting portfolio shell...',
-  `operator: ${CONFIG.name.toUpperCase()}`,
-  'press enter to initiate',
-];
+const BOOT_TRANSCRIPT = [
+  'Microsoft Windows [Version 10.0.26100.4061]',
+  '(c) Microsoft Corporation. All rights reserved.',
+  '',
+  'C:\\Users\\Aaron>portfolio.exe --secure',
+  '[OK] Secure uplink established',
+  '[OK] Neural viewport calibrated',
+  '[OK] Portfolio nodes mapped',
+  `[OK] Identity verified: ${CONFIG.name.toUpperCase()}`,
+  '',
+].join('\n');
 
 export default function IntroPortal({ onComplete }) {
   const prefersReduced =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const [phase, setPhase] = useState('boot'); // boot | playing
+  const [phase, setPhase] = useState('boot');
   const [bootText, setBootText] = useState('');
   const [bootReady, setBootReady] = useState(false);
-  const [endCardVisible, setEndCardVisible] = useState(false);
-  const [leaving, setLeaving] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [transitionFailed, setTransitionFailed] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [startQueued, setStartQueued] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
+  const dialogRef = useRef(null);
+  const enterButtonRef = useRef(null);
   const videoRef = useRef(null);
+  const transitionVideoRef = useRef(null);
+  const transitionStartedRef = useRef(false);
+  const leavingRef = useRef(false);
   const doneRef = useRef(false);
-  const endCardTimerRef = useRef(null);
-
+  const previousOverflowRef = useRef('');
   const showStatic = prefersReduced || videoFailed;
-  const wordmark = CONFIG.name.replace(' C. ', ' ').toUpperCase();
-  const fullBootText = BOOT_LINES.map((line, index) => `${index === BOOT_LINES.length - 1 ? '>' : '$'} ${line}`).join('\n');
+  const canEnter = bootReady && (videoReady || showStatic);
 
-  const finish = useCallback(() => {
+  const complete = useCallback(() => {
     if (doneRef.current) return;
     doneRef.current = true;
-    if (endCardTimerRef.current) window.clearTimeout(endCardTimerRef.current);
-    setLeaving(true);
-    window.setTimeout(() => onComplete?.(), 600);
+    onComplete?.();
   }, [onComplete]);
 
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, []);
+  const beginVisualExit = useCallback((keepAudioPlaying = false) => {
+    if (leavingRef.current) return;
+    leavingRef.current = true;
+    setLeaving(true);
+    document.body.style.overflow = previousOverflowRef.current;
+    window.requestAnimationFrame(() => {
+      document.getElementById('hero')?.focus({ preventScroll: true });
+    });
 
-  useEffect(() => () => {
-    if (endCardTimerRef.current) window.clearTimeout(endCardTimerRef.current);
+    if (!keepAudioPlaying) {
+      window.setTimeout(complete, 700);
+    }
+  }, [complete]);
+
+  const skipIntro = useCallback(() => {
+    videoRef.current?.pause();
+    transitionVideoRef.current?.pause();
+    beginVisualExit(false);
+  }, [beginVisualExit]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    previousOverflowRef.current = previousOverflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, []);
 
   useEffect(() => {
     if (prefersReduced) {
-      setBootText(fullBootText);
+      setBootText(BOOT_TRANSCRIPT);
       setBootReady(true);
-      return;
+      return undefined;
     }
 
     let index = 0;
     const timer = window.setInterval(() => {
       index += 1;
-      setBootText(fullBootText.slice(0, index));
-      if (index >= fullBootText.length) {
+      setBootText(BOOT_TRANSCRIPT.slice(0, index));
+      if (index >= BOOT_TRANSCRIPT.length) {
         window.clearInterval(timer);
         setBootReady(true);
       }
-    }, 18);
+    }, 9);
 
     return () => window.clearInterval(timer);
-  }, [fullBootText, prefersReduced]);
+  }, [prefersReduced]);
+
+  useEffect(() => {
+    if (phase === 'boot') {
+      enterButtonRef.current?.focus({ preventScroll: true });
+    }
+  }, [phase]);
 
   const startIntro = useCallback(() => {
-    if (phase !== 'boot' || !bootReady) return;
-    if (showStatic) {
-      finish();
+    if (phase !== 'boot') return;
+    if (!canEnter) {
+      setStartQueued(true);
       return;
     }
 
-    setPhase('playing');
-    setEndCardVisible(false);
+    if (showStatic) {
+      skipIntro();
+      return;
+    }
 
     const video = videoRef.current;
     if (!video) return;
+
+    setPhase('playing');
+    transitionStartedRef.current = false;
     video.currentTime = 0;
-    video.muted = false;
-    video.volume = 0.85;
+    video.muted = !soundEnabled;
+    video.volume = 0.35;
+
+    const transitionVideo = transitionVideoRef.current;
+    if (transitionVideo) {
+      transitionVideo.preload = 'auto';
+      transitionVideo.load();
+    }
+
     const playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === 'function') {
       playAttempt.catch(() => {
         video.muted = true;
+        setSoundEnabled(false);
         video.play().catch(() => setVideoFailed(true));
       });
     }
-  }, [bootReady, finish, phase, showStatic]);
+  }, [canEnter, phase, showStatic, skipIntro, soundEnabled]);
+
+  useEffect(() => {
+    if (startQueued && canEnter && phase === 'boot') {
+      startIntro();
+    }
+  }, [canEnter, phase, startIntro, startQueued]);
+
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((enabled) => {
+      const next = !enabled;
+      if (videoRef.current) {
+        videoRef.current.muted = !next;
+        videoRef.current.volume = 0.35;
+      }
+      return next;
+    });
+  }, []);
 
   const handleTimeUpdate = useCallback(() => {
     const video = videoRef.current;
-    if (!video || endCardVisible) return;
-    if (video.currentTime >= TAKEOVER_AT_SECONDS) {
-      setEndCardVisible(true);
-      endCardTimerRef.current = window.setTimeout(finish, END_CARD_HOLD_MS);
+    if (!video) return;
+
+    if (
+      video.currentTime >= TRANSITION_AT_SECONDS &&
+      !transitionStartedRef.current &&
+      !transitionFailed
+    ) {
+      const transitionVideo = transitionVideoRef.current;
+      if (transitionVideo) {
+        transitionStartedRef.current = true;
+        transitionVideo.currentTime = 0;
+        transitionVideo
+          .play()
+          .then(() => setPhase('transition'))
+          .catch(() => {
+            transitionStartedRef.current = false;
+            setTransitionFailed(true);
+          });
+      }
     }
-  }, [endCardVisible, finish]);
+
+    if (video.currentTime >= FADE_AT_SECONDS) {
+      beginVisualExit(true);
+    }
+  }, [beginVisualExit, transitionFailed]);
 
   useEffect(() => {
-    if (phase !== 'playing') return;
-    const timer = window.setTimeout(finish, SAFETY_TIMEOUT_MS);
+    if (phase === 'boot') return undefined;
+    const timer = window.setTimeout(complete, SAFETY_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
-  }, [finish, phase]);
+  }, [complete, phase]);
 
   useEffect(() => {
-    const onKey = (event) => {
-      if (event.key === 'Escape') finish();
-      if (event.key === 'Enter') startIntro();
+    const onKeyDown = (event) => {
+      if (leavingRef.current) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        skipIntro();
+        return;
+      }
+
+      if (event.key === 'Enter' && phase === 'boot') {
+        event.preventDefault();
+        startIntro();
+        return;
+      }
+
+      if (event.key.toLowerCase() === 's' && phase === 'boot') {
+        event.preventDefault();
+        skipIntro();
+        return;
+      }
+
+      if (event.key.toLowerCase() === 'm' && !showStatic) {
+        event.preventDefault();
+        toggleSound();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll('button:not([disabled])') ?? []
+      );
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [finish, startIntro]);
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [phase, showStatic, skipIntro, startIntro, toggleSound]);
+
+  const handleIntroEnded = useCallback(() => {
+    if (!leavingRef.current) {
+      beginVisualExit(false);
+      return;
+    }
+    complete();
+  }, [beginVisualExit, complete]);
 
   return (
     <div
-      className={`fixed inset-0 z-[300] overflow-hidden bg-black transition-opacity duration-500 ${
-        leaving ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      ref={dialogRef}
+      className={`intro-portal fixed inset-0 z-[300] overflow-hidden bg-black ${
+        leaving ? 'intro-portal-leaving pointer-events-none' : ''
       }`}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Intro - ${CONFIG.name}`}
-      onClick={phase === 'boot' ? startIntro : undefined}
+      role={leaving ? undefined : 'dialog'}
+      aria-modal={leaving ? undefined : 'true'}
+      aria-hidden={leaving ? 'true' : undefined}
+      aria-label={`Command Prompt portfolio intro for ${CONFIG.name}`}
     >
-      {!showStatic && (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ease-out"
-          style={{ opacity: phase === 'playing' && !endCardVisible ? 1 : 0 }}
-          src={INTRO_VIDEO_URL}
-          muted
-          playsInline
-          preload="auto"
-          onTimeUpdate={handleTimeUpdate}
-          onEnded={finish}
-          onError={() => setVideoFailed(true)}
-        />
-      )}
+      <div className="intro-ambient" aria-hidden="true" />
 
-      {showStatic && (
-        <div className="absolute inset-0 bg-matrix-gradient">
-          <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(rgba(0,255,65,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.6)_1px,transparent_1px)] bg-[length:44px_44px]" />
-        </div>
+      {!showStatic && (
+        <>
+          <video
+            ref={videoRef}
+            className={`intro-video ${phase === 'playing' ? 'is-visible' : ''}`}
+            src={INTRO_VIDEO_URL}
+            muted={!soundEnabled}
+            playsInline
+            preload="auto"
+            onCanPlay={() => setVideoReady(true)}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleIntroEnded}
+            onError={() => setVideoFailed(true)}
+          />
+          <video
+            ref={transitionVideoRef}
+            className={`intro-transition-video ${phase === 'transition' ? 'is-visible' : ''}`}
+            src={TRANSITION_VIDEO_URL}
+            muted
+            playsInline
+            preload="metadata"
+            onError={() => setTransitionFailed(true)}
+          />
+        </>
       )}
 
       {phase === 'boot' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,65,0.22),transparent_35%),linear-gradient(rgba(0,255,65,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.08)_1px,transparent_1px)] bg-[length:100%_100%,42px_42px,42px_42px]" />
-          <div className="relative z-10 w-[min(86vw,760px)] border border-matrix-green/30 bg-black/72 p-6 font-mono shadow-[0_0_48px_rgba(0,255,65,0.13)] backdrop-blur-sm sm:p-8">
-            <div className="mb-5 flex items-center justify-between border-b border-matrix-green/15 pb-3 text-[10px] uppercase tracking-[0.28em] text-matrix-green/55">
-              <span>root@aaron-portfolio</span>
-              <span>secure shell</span>
+        <div className="intro-boot">
+          <section className="intro-cmd-window" aria-label="Command Prompt">
+            <header className="intro-cmd-titlebar" aria-hidden="true">
+              <div className="intro-cmd-title">
+                <span className="intro-cmd-icon">C:\</span>
+                <span>Command Prompt</span>
+              </div>
+              <div className="intro-cmd-window-controls">
+                <span>—</span>
+                <span>□</span>
+                <span>×</span>
+              </div>
+            </header>
+
+            <div className="intro-cmd-body">
+              <pre className="intro-terminal" aria-hidden="true">
+                {bootText}
+                {!bootReady && <span className="intro-cursor">_</span>}
+              </pre>
+
+              <div className="intro-command-menu">
+                <p>
+                  <span className="intro-command-path">C:\Users\Aaron&gt;</span>
+                  {' '}Select an option:
+                </p>
+                <button
+                  ref={enterButtonRef}
+                  type="button"
+                  onClick={startIntro}
+                  className="intro-command-choice"
+                >
+                  <kbd>[Enter]</kbd>
+                  <span>{startQueued && !canEnter ? 'Preparing cinematic stream...' : 'Play cinematic intro'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={skipIntro}
+                  className="intro-command-choice"
+                >
+                  <kbd>[S]</kbd>
+                  <span>Skip to portfolio</span>
+                </button>
+                <span className="intro-cursor" aria-hidden="true">_</span>
+              </div>
             </div>
-            <pre className="min-h-[9rem] whitespace-pre-wrap text-sm leading-relaxed text-matrix-green sm:text-base">
-              {bootText}
-              {!bootReady && <span className="animate-pulse">_</span>}
-              {bootReady && <span className="animate-pulse"> _</span>}
-            </pre>
-            {bootReady && (
-              <button
-                onClick={(event) => { event.stopPropagation(); startIntro(); }}
-                autoFocus
-                className="mt-7 inline-flex items-center gap-3 rounded-md border border-matrix-green/45 bg-matrix-green/10 px-5 py-3 text-xs uppercase tracking-[0.3em] text-matrix-green transition-all hover:bg-matrix-green/20 hover:shadow-[0_0_24px_rgba(0,255,65,0.26)] focus:outline-none focus:ring-2 focus:ring-matrix-green/60 sm:text-sm"
-              >
-                Initiate <span aria-hidden="true">&gt;</span>
-              </button>
-            )}
+          </section>
+
+          <div className="sr-only" aria-live="polite">
+            {startQueued && !canEnter
+              ? 'Cinematic selected. Preparing media.'
+              : 'Choose Play cinematic intro or Skip to portfolio.'}
           </div>
         </div>
       )}
 
-      {endCardVisible && (
-        <div className="intro-end-card pointer-events-none absolute inset-0">
-          <div className="intro-end-takeover absolute inset-0" />
-          <div className="intro-end-halo absolute left-1/2 top-1/2 h-[46vmax] w-[46vmax] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl" />
-          <div className="intro-end-scan absolute inset-0" />
-
-          <div className="intro-end-lockup absolute left-1/2 top-1/2 flex w-[min(82vw,780px)] -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-6 sm:gap-8">
-            <div
-              className="intro-end-logo relative flex aspect-square w-[clamp(4.6rem,12vw,7.4rem)] shrink-0 items-center justify-center rounded-full border border-[#e4c55a]/70 bg-black/35 shadow-[0_0_34px_rgba(245,91,58,0.34)]"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-[-0.5rem] rounded-full border border-[#ef514b]/30" />
-              <div className="absolute inset-[-0.85rem] rounded-full border border-[#e4c55a]/18" />
-              <span className="bg-gradient-to-r from-[#ffe16b] via-[#9fea71] to-[#ff6f9f] bg-clip-text font-mono text-[clamp(2.25rem,5.4vw,4rem)] font-black leading-none text-transparent">
-                AA
-              </span>
-            </div>
-
-            <div className="min-w-0">
-              <div className="intro-end-wordmark bg-gradient-to-r from-[#ffe16b] via-[#ff9a71] to-[#ff4f92] bg-clip-text font-mono text-[clamp(1.45rem,4.6vw,3.55rem)] font-black leading-none text-transparent">
-                {wordmark}
-              </div>
-              <div className="intro-end-tagline mt-3 font-mono text-[clamp(0.68rem,1.6vw,1rem)] uppercase tracking-[0.34em] text-[#d8c5bd]/72">
-                Systems / Security / AI
-              </div>
-            </div>
-          </div>
-        </div>
+      {!showStatic && (
+        <button
+          type="button"
+          onClick={toggleSound}
+          aria-pressed={soundEnabled}
+          aria-keyshortcuts="M"
+          className="intro-control intro-sound-control"
+        >
+          [M] Sound {soundEnabled ? 'on' : 'off'}
+        </button>
       )}
 
       <button
-        onClick={(event) => { event.stopPropagation(); finish(); }}
-        aria-label="Skip intro"
-        className="absolute bottom-5 right-5 z-20 inline-flex items-center gap-2 rounded-md border border-matrix-green/30 bg-black/45 px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-white/70 uppercase backdrop-blur-sm transition-all hover:border-matrix-green/60 hover:text-matrix-green focus:outline-none focus:ring-2 focus:ring-matrix-green/60"
+        type="button"
+        onClick={skipIntro}
+        aria-label="Skip intro and open portfolio"
+        className="intro-control intro-skip-control"
       >
-        Skip <span aria-hidden="true">&gt;&gt;</span>
+        [Esc] Skip intro
       </button>
-
-      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_180px_60px_rgba(0,0,0,0.85)]" />
     </div>
   );
 }

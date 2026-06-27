@@ -64,6 +64,9 @@ export default function App() {
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false);
     try { sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* storage may be unavailable */ }
+    window.requestAnimationFrame(() => {
+      document.getElementById('hero')?.focus({ preventScroll: true });
+    });
   }, []);
   const mouseRef = useRef({ x: 0.5, y: 0.5 });
   const scrollRef = useRef(0);

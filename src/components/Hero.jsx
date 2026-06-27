@@ -110,7 +110,11 @@ export default function Hero() {
   }, []);
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center pt-20 px-4 sm:px-6">
+    <section
+      id="hero"
+      tabIndex="-1"
+      className="relative min-h-screen flex items-center pt-20 px-4 sm:px-6 focus:outline-none"
+    >
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-8 w-full xl:px-12">
         <div className="grid lg:grid-cols-[1fr_520px] gap-8 lg:gap-20 items-center">

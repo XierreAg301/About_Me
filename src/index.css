@@ -338,10 +338,10 @@ img { max-width: 100%; display: block; }
 }
 
 @keyframes streamFade {
-  0% { opacity: 0; backdrop-filter: none; }
-  20% { opacity: 1; backdrop-filter: saturate(120%) blur(1px); }
-  80% { opacity: 1; backdrop-filter: saturate(120%) blur(1px); }
-  100% { opacity: 0; visibility: hidden; backdrop-filter: none; }
+  0% { opacity: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  20% { opacity: 1; -webkit-backdrop-filter: saturate(120%) blur(1px); backdrop-filter: saturate(120%) blur(1px); }
+  80% { opacity: 1; -webkit-backdrop-filter: saturate(120%) blur(1px); backdrop-filter: saturate(120%) blur(1px); }
+  100% { opacity: 0; visibility: hidden; -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 @keyframes scanlineSweep {
@@ -384,88 +384,307 @@ img { max-width: 100%; display: block; }
 }
 
 /* ===================================================
-   INTRO END-CARD
+   CINEMATIC INTRO PORTAL
    =================================================== */
-.intro-end-card {
-  animation: introEndCardFade 0.55s ease-out both;
+.intro-portal {
+  --intro-cyan: #42f5e9;
+  --intro-green: #50ff8a;
+  --intro-violet: #8f6bff;
+  --intro-ink: #03060b;
+  --cmd-black: #0c0c0c;
+  --cmd-chrome: #202020;
+  --cmd-border: #454545;
+  --cmd-text: #cccccc;
+  isolation: isolate;
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.7s ease;
 }
 
-.intro-end-takeover {
+.intro-portal-leaving {
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.intro-ambient {
+  position: absolute;
+  inset: 0;
+  background: #080808;
+}
+
+.intro-ambient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.24;
   background:
-    radial-gradient(circle at 52% 46%, rgba(117, 23, 16, 0.72) 0%, rgba(23, 3, 2, 0.94) 43%, rgba(0, 0, 0, 0.99) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.88));
-  animation: introEndTakeover 0.7s ease-out both;
+    linear-gradient(120deg, rgba(255, 255, 255, 0.025), transparent 42%),
+    radial-gradient(circle at 50% 42%, #161616, #080808 68%);
 }
 
-.intro-end-halo {
-  background:
-    radial-gradient(circle, rgba(255, 98, 57, 0.32) 0%, rgba(224, 46, 92, 0.22) 38%, rgba(0, 0, 0, 0) 70%);
-  animation: introEndHalo 3.4s ease-in-out 0.55s infinite;
+.intro-video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.015);
+  transition: opacity 0.45s ease, transform 1.2s ease;
 }
 
-.intro-end-scan {
-  background:
-    repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.025) 0deg 1deg, transparent 1deg 7deg),
-    linear-gradient(90deg, transparent, rgba(255, 95, 141, 0.12), transparent);
-  animation: introEndScan 2.8s ease-in-out 0.55s infinite;
+.intro-video.is-visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.intro-end-lockup {
-  animation: introEndLockupIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.42s both;
+.intro-transition-video {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.35s ease, transform 1.2s ease;
 }
 
-.intro-end-logo {
-  animation:
-    introEndLogoIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.48s both,
-    introEndFloat 3s ease-in-out 1.45s infinite;
+.intro-transition-video.is-visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.intro-end-wordmark {
-  letter-spacing: 0.06em;
-  text-shadow: 0 0 22px rgba(255, 78, 124, 0.24);
-  animation: introEndTextIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.62s both;
+.intro-boot {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(8, 8, 8, 0.72);
 }
 
-.intro-end-tagline {
-  animation: introEndTextIn 0.95s cubic-bezier(0.18, 1, 0.32, 1) 0.75s both;
+.intro-cmd-window {
+  position: relative;
+  width: min(92vw, 920px);
+  min-height: min(62vh, 520px);
+  overflow: hidden;
+  border: 1px solid var(--cmd-border);
+  border-radius: 7px;
+  background: var(--cmd-black);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.62);
 }
 
-@keyframes introEndCardFade {
-  from { opacity: 0; }
-  to { opacity: 1; filter: blur(0); }
+.intro-cmd-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding-left: 0.75rem;
+  background: var(--cmd-chrome);
+  color: #f0f0f0;
+  font-family: 'CascadiaCode', Consolas, monospace;
+  font-size: 0.76rem;
+  user-select: none;
 }
 
-@keyframes introEndTakeover {
-  from { opacity: 0; filter: blur(12px); }
-  to { opacity: 1; filter: blur(0); }
+.intro-cmd-title,
+.intro-cmd-window-controls {
+  display: flex;
+  align-items: center;
 }
 
-@keyframes introEndHalo {
-  0%, 100% { transform: translate(-50%, -50%) scale(0.88); opacity: 0.68; }
-  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+.intro-cmd-title {
+  gap: 0.6rem;
 }
 
-@keyframes introEndScan {
-  0%, 100% { transform: scale(1); opacity: 0.28; }
-  50% { transform: scale(1.18); opacity: 0.48; }
+.intro-cmd-icon {
+  color: #f5f5f5;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
-@keyframes introEndLockupIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.intro-cmd-window-controls {
+  align-self: stretch;
 }
 
-@keyframes introEndLogoIn {
-  from { opacity: 0; transform: translateX(-34px) scale(0.74) rotate(-8deg); }
-  to { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
+.intro-cmd-window-controls span {
+  display: grid;
+  width: 46px;
+  place-items: center;
+  color: #d6d6d6;
+  font-family: 'Segoe UI Symbol', sans-serif;
+  font-size: 0.8rem;
 }
 
-@keyframes introEndFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+.intro-cmd-window-controls span:last-child {
+  font-size: 1rem;
 }
 
-@keyframes introEndTextIn {
-  from { opacity: 0; transform: translateX(30px); filter: blur(8px); }
-  to { opacity: 1; transform: translateX(0); filter: blur(0); }
+.intro-cmd-body {
+  min-height: calc(min(62vh, 520px) - 38px);
+  padding: 0.85rem 1rem 1.25rem;
+}
+
+.intro-terminal {
+  position: relative;
+  min-height: 12.5rem;
+  white-space: pre-wrap;
+  color: var(--cmd-text);
+  font-family: 'CascadiaCode', Consolas, monospace;
+  font-size: clamp(0.72rem, 1.5vw, 0.94rem);
+  line-height: 1.55;
+}
+
+.intro-cursor {
+  color: #f1f1f1;
+  animation: introCursor 0.8s steps(1) infinite;
+}
+
+.intro-command-menu {
+  color: #c8c8c8;
+  font-family: 'CascadiaCode', Consolas, monospace;
+  font-size: clamp(0.72rem, 1.5vw, 0.94rem);
+  line-height: 1.55;
+}
+
+.intro-command-menu p {
+  margin-bottom: 0.25rem;
+}
+
+.intro-command-choice {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 36px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  border: 0;
+  background: transparent;
+  padding: 0.2rem 0.35rem;
+  color: var(--cmd-text);
+  font: inherit;
+  text-align: left;
+}
+
+.intro-command-choice:hover {
+  color: #fff;
+}
+
+.intro-command-choice:focus-visible {
+  outline: 1px dotted #f0f0f0;
+  outline-offset: 1px;
+}
+
+.intro-command-path {
+  color: #f0f0f0;
+}
+
+.intro-command-choice kbd {
+  min-width: 4.5rem;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+}
+
+.intro-command-menu > .intro-cursor {
+  display: inline-block;
+  margin-top: 0.15rem;
+}
+
+.intro-control {
+  position: absolute;
+  z-index: 20;
+  bottom: clamp(1rem, 3vw, 1.8rem);
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0.6rem 0;
+  color: rgba(220, 220, 220, 0.62);
+  font-family: 'CascadiaCode', Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  transition: color 0.2s ease;
+}
+
+.intro-control:hover {
+  color: #fff;
+}
+
+.intro-control:focus-visible {
+  outline: 1px dotted #f0f0f0;
+  outline-offset: 4px;
+}
+
+.intro-sound-control {
+  left: clamp(1rem, 3vw, 1.8rem);
+}
+
+.intro-skip-control {
+  right: clamp(1rem, 3vw, 1.8rem);
+}
+
+@media (max-width: 767px) {
+  .intro-video {
+    object-fit: contain;
+    background:
+      radial-gradient(circle at 50% 46%, rgba(75, 38, 129, 0.34), transparent 42%),
+      #020307;
+  }
+
+  .intro-video.is-visible {
+    transform: scale(1);
+  }
+
+  .intro-boot {
+    align-items: center;
+    padding: 0.65rem;
+  }
+
+  .intro-cmd-window {
+    width: 100%;
+    min-height: min(70vh, 560px);
+    border-radius: 5px;
+  }
+
+  .intro-cmd-titlebar {
+    padding-left: 0.55rem;
+  }
+
+  .intro-cmd-window-controls span {
+    width: 34px;
+  }
+
+  .intro-cmd-body {
+    min-height: calc(min(70vh, 560px) - 38px);
+    padding: 0.75rem;
+  }
+
+  .intro-terminal {
+    min-height: 14rem;
+    overflow-wrap: anywhere;
+    font-size: 0.68rem;
+    line-height: 1.55;
+  }
+
+  .intro-command-menu {
+    font-size: 0.68rem;
+  }
+
+  .intro-command-choice {
+    min-height: 44px;
+  }
+
+  .intro-control {
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    font-size: 0.58rem;
+  }
+}
+
+@keyframes introCursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
