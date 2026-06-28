@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { CONFIG } from '../../config';
 import PanelSection from './PanelSection';
+import Icon from '../components/Icon';
 
 function CertificateImage({ certificate }) {
   const [failed, setFailed] = useState(false);
   if (failed || !certificate.imageUrl) {
     return (
       <div className="certificate-fallback" aria-hidden="true">
+        <Icon name="shield" size={20} />
         <span>VERIFIED</span>
       </div>
     );
@@ -43,9 +45,13 @@ export default function CertificatesPanel() {
               <CertificateImage certificate={certificate} />
             </div>
             <div>
-              <p className="system-label">CREDENTIAL {String(index + 1).padStart(2, '0')}</p>
+              <p className="system-label">
+                <span className="gem" aria-hidden="true" /> CREDENTIAL {String(index + 1).padStart(2, '0')}
+              </p>
               <h3>{certificate.title}</h3>
-              <span className="text-link">Open certificate ↗</span>
+              <span className="text-link">
+                Open certificate <Icon name="external-link" size={14} />
+              </span>
             </div>
           </a>
         ))}

@@ -5,136 +5,135 @@ import {
   useRef,
   useState,
 } from 'react';
-import { PORTFOLIO_SECTIONS, isPortfolioSection } from './portfolioSections';
+import { isPortfolioSection, PORTFOLIO_SECTIONS } from './portfolioSections';
 import { PortfolioNavigationContext } from './portfolioNavigationState';
 import useReducedMotion from '../hooks/useReducedMotion';
 
+const FIRST_SECTION = PORTFOLIO_SECTIONS[0].id; // 'hero'
+
 function sectionFromHash() {
-  if (typeof window === 'undefined') return 'hero';
+  if (typeof window === 'undefined') return null;
   const id = window.location.hash.replace(/^#/, '');
-  return isPortfolioSection(id) ? id : 'hero';
+  return isPortfolioSection(id) ? id : null;
 }
 
-export function PortfolioNavigationProvider({ children }) {
-  const [activeSection, setActiveSection] = useState(sectionFromHash);
-  const [focusedSection, setFocusedSection] = useState(sectionFromHash);
-  const [navigationSource, setNavigationSource] = useState('initial');
-  const reducedMotion = useReducedMotion();
-  const activeRef = useRef(activeSection);
-  const ratiosRef = useRef(new Map());
-  const programmaticTargetRef = useRef(null);
+function cleanUrl() {
+  return `${window.location.pathname}${window.location.search}`;
+}
 
-  useEffect(() => {
-    activeRef.current = activeSection;
-  }, [activeSection]);
+/**
+ * Scroll-driven navigation. The portfolio is now a vertical scroll story: the
+ * 3D network is a fixed backdrop and each section flows down the page. The
+ * "active" section is whatever the visitor has scrolled to (reported by an
+ * IntersectionObserver in the shell). `navigateTo` smooth-scrolls to a section
+ * and keeps the URL hash and history in sync. `isPanelOpen` is kept as a
+ * derived flag (true once the visitor has scrolled past the hero) so the 3D
+ * backdrop can fly the camera from the wide network view onto the active node.
+ */
+export function PortfolioNavigationProvider({ children }) {
+  const [activeSection, setActiveSection] = useState(
+    () => sectionFromHash() || FIRST_SECTION
+  );
+  const [focusedSection, setFocusedSection] = useState(
+    () => sectionFromHash() || FIRST_SECTION
+  );
+  const reducedMotion = useReducedMotion();
+  // While a programmatic scroll is animating, ignore observer reports so the
+  // target section stays "active" until the scroll settles.
+  const navLockRef = useRef(false);
+
+  const scrollToSection = useCallback((id, { smooth = true } = {}) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.scrollIntoView({
+      behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
+      block: 'start',
+    });
+  }, [reducedMotion]);
 
   const focusMap = useCallback(() => {
-    const map = document.getElementById('portfolio-map-nav');
-    map?.focus({ preventScroll: true });
+    document.getElementById('portfolio-map-nav')?.focus?.({ preventScroll: true });
+  }, []);
+
+  // Called by the scroll observer as sections cross the viewport centre.
+  const reportActiveSection = useCallback((id) => {
+    if (!isPortfolioSection(id) || navLockRef.current) return;
+    setActiveSection((previous) => {
+      if (previous === id) return previous;
+      const nextUrl = id === FIRST_SECTION ? cleanUrl() : `#${id}`;
+      window.history.replaceState({ section: id }, '', nextUrl);
+      return id;
+    });
+    setFocusedSection(id);
   }, []);
 
   const navigateTo = useCallback((id, options = {}) => {
     if (!isPortfolioSection(id)) return;
-    const {
-      source = 'control',
-      history = 'push',
-      focusPanel = true,
-      scrollBehavior,
-    } = options;
-    const target = document.getElementById(id);
+    const { history = 'push' } = options;
 
     setActiveSection(id);
     setFocusedSection(id);
-    setNavigationSource(source);
-    programmaticTargetRef.current = id;
 
-    if (history === 'push' && window.location.hash !== `#${id}`) {
-      window.history.pushState({ section: id }, '', `#${id}`);
-    } else if (history === 'replace' && window.location.hash !== `#${id}`) {
-      window.history.replaceState({ section: id }, '', `#${id}`);
+    const targetHash = `#${id}`;
+    if (history !== 'none' && window.location.hash !== targetHash) {
+      const nextUrl = id === FIRST_SECTION ? cleanUrl() : targetHash;
+      if (history === 'replace') {
+        window.history.replaceState({ section: id }, '', nextUrl);
+      } else {
+        window.history.pushState({ section: id }, '', nextUrl);
+      }
     }
 
-    if (!target) {
-      programmaticTargetRef.current = null;
-      return;
-    }
-    target.scrollIntoView({
-      behavior: scrollBehavior || (reducedMotion ? 'auto' : 'smooth'),
-      block: 'start',
-    });
-
+    navLockRef.current = true;
+    scrollToSection(id);
     window.setTimeout(() => {
-      if (programmaticTargetRef.current === id) {
-        programmaticTargetRef.current = null;
-      }
-    }, reducedMotion ? 80 : 1200);
+      navLockRef.current = false;
+    }, reducedMotion ? 60 : 900);
 
-    if (focusPanel) {
-      window.setTimeout(() => {
-        target.focus({ preventScroll: true });
-      }, reducedMotion ? 0 : 420);
-    }
-  }, [reducedMotion]);
+    // Move focus to the section for keyboard/screen-reader users without
+    // triggering a second scroll jump.
+    window.setTimeout(() => {
+      document.getElementById(id)?.focus?.({ preventScroll: true });
+    }, reducedMotion ? 0 : 620);
+  }, [reducedMotion, scrollToSection]);
 
-  useEffect(() => {
-    const initialSection = sectionFromHash();
-    if (initialSection === 'hero') return;
-    navigateTo(initialSection, {
-      source: 'initial',
-      history: 'none',
-      focusPanel: false,
-      scrollBehavior: 'auto',
-    });
+  const closePanel = useCallback((options = {}) => {
+    navigateTo(FIRST_SECTION, { source: 'close', ...options });
   }, [navigateTo]);
 
+  // Browser history / manual hash edits -> scroll to the section.
   useEffect(() => {
-    const updateFromHistory = () => {
-      const id = sectionFromHash();
-      navigateTo(id, { source: 'history', history: 'none', focusPanel: false });
-    };
-    window.addEventListener('popstate', updateFromHistory);
-    window.addEventListener('hashchange', updateFromHistory);
-    return () => {
-      window.removeEventListener('popstate', updateFromHistory);
-      window.removeEventListener('hashchange', updateFromHistory);
-    };
-  }, [navigateTo]);
-
-  useEffect(() => {
-    const elements = PORTFOLIO_SECTIONS
-      .map(({ id }) => document.getElementById(id))
-      .filter(Boolean);
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        ratiosRef.current.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
-      });
-
-      const [mostVisible] = [...ratiosRef.current.entries()]
-        .sort((left, right) => right[1] - left[1]);
-      if (
-        programmaticTargetRef.current
-        && mostVisible?.[0] !== programmaticTargetRef.current
-      ) {
-        return;
-      }
-      if (mostVisible?.[0] === programmaticTargetRef.current) {
-        programmaticTargetRef.current = null;
-      }
-      if (!mostVisible || mostVisible[1] <= 0 || mostVisible[0] === activeRef.current) return;
-
-      const id = mostVisible[0];
+    const syncFromUrl = () => {
+      const id = sectionFromHash() || FIRST_SECTION;
+      navLockRef.current = true;
       setActiveSection(id);
       setFocusedSection(id);
-      setNavigationSource('scroll');
-      window.history.replaceState({ section: id }, '', `#${id}`);
-    }, {
-      threshold: [0.15, 0.3, 0.5, 0.7],
-      rootMargin: '-16% 0px -58% 0px',
-    });
+      scrollToSection(id);
+      window.setTimeout(() => {
+        navLockRef.current = false;
+      }, reducedMotion ? 60 : 900);
+    };
 
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
+    window.addEventListener('popstate', syncFromUrl);
+    window.addEventListener('hashchange', syncFromUrl);
+    return () => {
+      window.removeEventListener('popstate', syncFromUrl);
+      window.removeEventListener('hashchange', syncFromUrl);
+    };
+  }, [reducedMotion, scrollToSection]);
+
+  // Honour a deep link on first load once the sections have laid out.
+  useEffect(() => {
+    const id = sectionFromHash();
+    if (!id || id === FIRST_SECTION) return;
+    navLockRef.current = true;
+    window.requestAnimationFrame(() => scrollToSection(id, { smooth: false }));
+    const timer = window.setTimeout(() => {
+      navLockRef.current = false;
+    }, 400);
+    return () => window.clearTimeout(timer);
+    // Run once on mount only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -145,21 +144,27 @@ export function PortfolioNavigationProvider({ children }) {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [focusMap]);
 
+  const isPanelOpen = activeSection !== FIRST_SECTION;
+
   const value = useMemo(() => ({
     activeSection,
     focusedSection,
-    navigationSource,
+    isPanelOpen,
     reducedMotion,
     setFocusedSection,
+    reportActiveSection,
     navigateTo,
+    closePanel,
     focusMap,
   }), [
     activeSection,
+    closePanel,
     focusMap,
     focusedSection,
+    isPanelOpen,
     navigateTo,
-    navigationSource,
     reducedMotion,
+    reportActiveSection,
   ]);
 
   return (

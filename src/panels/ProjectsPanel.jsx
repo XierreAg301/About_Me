@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CONFIG } from '../../config';
 import PanelSection from './PanelSection';
+import Icon from '../components/Icon';
 
 function assetUrl(url) {
   if (!url?.startsWith('/')) return url;
@@ -43,11 +44,18 @@ export default function ProjectsPanel() {
             key={project.title}
           >
             <div className="project-rail" aria-hidden="true">
-              <span>{String(index + 1).padStart(2, '0')}</span>
+              <span className="gem" data-gem={project.featured ? 'red' : 'violet'} />
+              <span className="project-rail-index">{String(index + 1).padStart(2, '0')}</span>
             </div>
             <div className="project-content">
               <div className="project-meta">
-                <span>{project.featured ? 'PRIORITY MISSION' : 'MISSION ARCHIVE'}</span>
+                <span className={project.featured ? 'mission-tag mission-tag-priority' : 'mission-tag'}>
+                  {project.featured ? (
+                    <><Icon name="target" size={13} /> PRIORITY MISSION</>
+                  ) : (
+                    <><Icon name="layers" size={13} /> MISSION ARCHIVE</>
+                  )}
+                </span>
                 <time>{project.date}</time>
               </div>
               <h3>{project.title}</h3>
@@ -89,12 +97,12 @@ export default function ProjectsPanel() {
                 <div className="project-links">
                   {project.demoUrl ? (
                     <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
-                      Live deployment
+                      <Icon name="external-link" size={15} /> Live deployment
                     </a>
                   ) : null}
                   {project.repoUrl ? (
                     <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
-                      Source repository
+                      <Icon name="github" size={15} /> Source repository
                     </a>
                   ) : null}
                 </div>

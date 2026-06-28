@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import usePortfolioNavigation from '../app/usePortfolioNavigation';
 import useWebGLSupport from '../hooks/useWebGLSupport';
-import NodeNavigator from './NodeNavigator';
 import SceneErrorBoundary from './SceneErrorBoundary';
 import StaticNodeMap from './StaticNodeMap';
 
@@ -22,9 +21,15 @@ function useMobileViewport() {
   return mobile;
 }
 
+/**
+ * The 3D network now lives entirely behind the content as a fixed cinematic
+ * backdrop. It is decorative (the mini-map drives navigation), so it is hidden
+ * from assistive tech and never captures pointer/scroll. As the visitor scrolls
+ * the camera flies from the wide network view onto the active node.
+ */
 export default function PortfolioWorldStage() {
   const webGLSupported = useWebGLSupport();
-  const { reducedMotion } = usePortfolioNavigation();
+  const { isPanelOpen, reducedMotion } = usePortfolioNavigation();
   const [sceneFailed, setSceneFailed] = useState(false);
   const isMobile = useMobileViewport();
   const useStaticMap = reducedMotion || webGLSupported !== true || sceneFailed;
@@ -37,19 +42,11 @@ export default function PortfolioWorldStage() {
         : 'no-webgl';
 
   return (
-    <aside className="world-stage" aria-label="Interactive portfolio map">
-      <div className="world-stage-header">
-        <div>
-          <p className="system-label">PORTFOLIO WORLD / NODE MAP</p>
-          <p id="map-instructions">
-            Use arrow keys to move between nodes, Enter to open, and Escape to return.
-          </p>
-        </div>
-        <span className="world-mode" aria-live="polite">
-          {webGLSupported === null ? 'SCANNING' : useStaticMap ? 'STATIC LINK' : 'WEBGL LINK'}
-        </span>
-      </div>
-
+    <div
+      className="world-stage"
+      data-panel-open={isPanelOpen}
+      aria-hidden="true"
+    >
       <div className="world-viewport">
         {useStaticMap ? (
           <StaticNodeMap reason={fallbackReason} />
@@ -63,11 +60,10 @@ export default function PortfolioWorldStage() {
                 isMobile={isMobile}
                 onContextLost={() => setSceneFailed(true)}
               />
-              <NodeNavigator />
             </Suspense>
           </SceneErrorBoundary>
         )}
       </div>
-    </aside>
+    </div>
   );
 }

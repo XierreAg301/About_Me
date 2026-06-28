@@ -18,7 +18,8 @@ export default function PanelSection({
       tabIndex="-1"
       aria-labelledby={headingId}
       data-active={activeSection === id}
-      className={`portfolio-panel ${className}`}
+      data-reveal=""
+      className={`portfolio-panel story-reveal ${className}`}
     >
       <div className="panel-heading">
         <p className="system-label">

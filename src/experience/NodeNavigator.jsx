@@ -2,6 +2,11 @@ import { useRef } from 'react';
 import usePortfolioNavigation from '../app/usePortfolioNavigation';
 import { PORTFOLIO_SECTIONS } from '../app/portfolioSections';
 
+/**
+ * The clickable node layer. It now lives inside the persistent mini-map and
+ * doubles as a scroll progress indicator: the node matching the section in view
+ * is marked active, and selecting one smooth-scrolls to that section.
+ */
 export default function NodeNavigator() {
   const {
     activeSection,
@@ -47,7 +52,7 @@ export default function NodeNavigator() {
       id="portfolio-map-nav"
       className="node-navigator"
       role="toolbar"
-      aria-label="Portfolio world map"
+      aria-label="Portfolio section map"
       aria-describedby="map-instructions"
       tabIndex="-1"
       onKeyDown={handleKeyDown}
@@ -69,16 +74,15 @@ export default function NodeNavigator() {
             }}
             data-active={isActive}
             data-priority={section.priority}
-            aria-pressed={isActive}
+            data-color={section.color}
+            aria-label={`${section.label} section`}
+            aria-current={isActive ? 'location' : undefined}
             tabIndex={isFocused ? 0 : -1}
             onFocus={() => setFocusedSection(section.id)}
-            onClick={() => navigateTo(section.id, {
-              source: 'map',
-              focusPanel: true,
-            })}
+            onClick={() => navigateTo(section.id, { source: 'map' })}
           >
             <span className="map-node-pulse" aria-hidden="true" />
-            <span className="map-node-label">
+            <span className="map-node-label" aria-hidden="true">
               <small>{section.index}</small>
               {section.label}
             </span>

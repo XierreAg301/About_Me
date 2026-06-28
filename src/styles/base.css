@@ -12,21 +12,48 @@
 
 :root {
   color-scheme: dark;
-  --space-void: #03040a;
-  --space-deep: #070914;
-  --space-panel: #0b0e1a;
-  --space-elevated: #111528;
-  --space-line: rgba(129, 151, 207, 0.2);
-  --space-line-strong: rgba(121, 181, 255, 0.38);
-  --signal-cyan: #63edf7;
-  --signal-cyan-bright: #d5fcff;
-  --signal-violet: #9270ff;
-  --signal-green: #68f59a;
-  --signal-amber: #ffc66d;
-  --text-primary: #f1f5ff;
-  --text-secondary: #aeb9d4;
-  --text-muted: #76809b;
+
+  /* ── Trickster metallic surfaces (gunmetal / brushed steel) ── */
+  --space-void: #08090c;
+  --space-deep: #0c0d12;
+  --space-panel: #14151c;
+  --space-elevated: #1c1e28;
+  --space-line: rgba(176, 184, 204, 0.18);
+  --space-line-strong: rgba(214, 224, 245, 0.34);
+
+  /* ── Signal palette ──
+     The token names are kept stable so existing rules adopt the new
+     theme: "cyan" is now the gold primary signal, "violet" is brushed
+     steel structure, "green" stays as the status/online accent. */
+  --signal-cyan: #f3b73d;          /* primary = gem gold */
+  --signal-cyan-bright: #ffe3a0;
+  --signal-violet: #b3bcd1;        /* structure = brushed steel */
+  --signal-green: #56d98a;         /* status = online */
+  --signal-amber: #ff9f45;
+
+  /* ── Metallic accents & gems ── */
+  --gem-gold: #f3b73d;
+  --gem-gold-bright: #ffd45e;
+  --gem-red: #e6364f;
+  --gem-red-bright: #ff5d72;
+  --gem-violet: #9270ff;
+  --gem-green: #56d98a;
+  --alert-red: #e6364f;
+  --metal-silver: #c6cdda;
+  --metal-edge: rgba(232, 238, 250, 0.16);   /* top bevel highlight */
+  --metal-shadow: rgba(0, 0, 0, 0.55);
+  --metal-base: linear-gradient(157deg, #23252f 0%, #16171f 46%, #0e0f15 100%);
+  --metal-rail: linear-gradient(180deg, #2a2c38, #14151c);
+
+  /* Brushed-steel grain (procedural, CC0) */
+  --metal-grain:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+
+  --text-primary: #f3f1ea;
+  --text-secondary: #b6bccb;
+  --text-muted: #7c8499;
   --font-mono: 'CascadiaCode', 'SFMono-Regular', Consolas, monospace;
+  --font-display: 'Chakra Petch', 'CascadiaCode', ui-sans-serif, system-ui, sans-serif;
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --header-height: 74px;
   --content-max: 1540px;
@@ -46,8 +73,9 @@ body {
   margin: 0;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 12% 8%, rgba(87, 49, 175, 0.13), transparent 29rem),
-    radial-gradient(circle at 88% 22%, rgba(29, 164, 193, 0.09), transparent 32rem),
+    radial-gradient(circle at 14% 6%, rgba(243, 183, 61, 0.08), transparent 30rem),
+    radial-gradient(circle at 86% 18%, rgba(230, 54, 79, 0.07), transparent 34rem),
+    radial-gradient(circle at 50% 120%, rgba(198, 205, 218, 0.05), transparent 40rem),
     var(--space-void);
   color: var(--text-primary);
   font-family: var(--font-sans);
@@ -75,13 +103,13 @@ img {
 }
 
 ::selection {
-  background: rgba(99, 237, 247, 0.24);
+  background: rgba(243, 183, 61, 0.26);
   color: #fff;
 }
 
 :focus-visible {
   outline: 2px solid var(--signal-cyan);
-  outline-offset: 4px;
+  outline-offset: 3px;
 }
 
 .sr-only {

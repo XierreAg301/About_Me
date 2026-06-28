@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CONFIG } from '../../config';
 import PanelSection from './PanelSection';
+import Icon from '../components/Icon';
 
 export default function BackgroundPanel() {
   const [logoFailed, setLogoFailed] = useState(false);
@@ -26,7 +27,9 @@ export default function BackgroundPanel() {
           )}
         </div>
         <div>
-          <p className="system-label">CURRENT EDUCATION</p>
+          <p className="system-label">
+            <Icon name="award" size={13} /> CURRENT EDUCATION
+          </p>
           {CONFIG.education.map((item) => (
             <div key={item.degree}>
               <h3>{item.degree}</h3>

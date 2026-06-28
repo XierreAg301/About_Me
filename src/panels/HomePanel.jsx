@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { CONFIG } from '../../config';
 import usePortfolioNavigation from '../app/usePortfolioNavigation';
+import Icon from '../components/Icon';
 
 function NavAction({ target, children, className }) {
   const { navigateTo } = usePortfolioNavigation();
@@ -19,64 +19,63 @@ function NavAction({ target, children, className }) {
 }
 
 export default function HomePanel() {
-  const [avatarFailed, setAvatarFailed] = useState(false);
-  const featuredProject = CONFIG.projects.find((project) => project.featured) || CONFIG.projects[0];
+  const { activeSection, navigateTo } = usePortfolioNavigation();
 
   return (
     <section
       id="hero"
       tabIndex="-1"
       aria-labelledby="hero-heading"
-      className="portfolio-panel home-panel"
+      data-active={activeSection === 'hero'}
+      data-reveal=""
+      className="portfolio-panel home-panel story-reveal"
     >
-      <div className="home-status">
-        <span className="status-dot" aria-hidden="true" />
-        <span>Portfolio network online</span>
-      </div>
-
-      <div className="home-identity">
-        <div className="avatar-frame">
-          {!avatarFailed && CONFIG.avatar ? (
-            <img
-              src={CONFIG.avatar}
-              alt=""
-              referrerPolicy="no-referrer"
-              onError={() => setAvatarFailed(true)}
-            />
-          ) : (
-            <span aria-hidden="true">AA</span>
-          )}
+      <div className="home-hero-copy">
+        <div className="home-status">
+          <span className="status-dot" aria-hidden="true" />
+          <span>Global portfolio network online</span>
         </div>
 
-        <div>
-          <p className="system-label"><span>00</span> IDENTITY</p>
-          <h1 id="hero-heading">{CONFIG.name}</h1>
-          <p className="home-role">{CONFIG.title}</p>
+        <p className="system-label"><span>00</span> PORTFOLIO / 2026</p>
+        <h1 id="hero-heading">{CONFIG.name}</h1>
+        <p className="home-role">
+          <span className="gem" data-gem="red" aria-hidden="true" />
+          {CONFIG.title}
+        </p>
+        <p className="home-tagline">{CONFIG.tagline}</p>
+
+        <div className="panel-actions" aria-label="Primary actions">
+          <NavAction target="projects" className="action-primary">
+            View selected work
+            <Icon name="arrow-up-right" size={16} />
+          </NavAction>
+          <NavAction target="about" className="action-secondary">
+            Enter the network
+            <Icon name="chevron-down" size={16} />
+          </NavAction>
+        </div>
+
+        <div className="hero-readout" aria-hidden="true">
+          <span>SG / 01.3521° N</span>
+          <i />
+          <span>PORTFOLIO SYSTEM ONLINE</span>
         </div>
       </div>
 
-      <p className="home-tagline">{CONFIG.tagline}</p>
-      <p className="home-summary">{CONFIG.summary}</p>
-
-      <div className="panel-actions" aria-label="Primary actions">
-        <NavAction target="projects" className="action-primary">
-          Explore projects <span aria-hidden="true">↗</span>
-        </NavAction>
-        <NavAction target="contact" className="action-secondary">
-          Open comms
-        </NavAction>
+      <div className="hero-beacon-label" aria-hidden="true">
+        <span>CONNECTED WORLD</span>
+        <strong>07 ACTIVE NODES</strong>
+        <i />
       </div>
 
-      <div className="signal-card">
-        <div>
-          <p className="system-label">FEATURED MISSION</p>
-          <h2>{featuredProject.title}</h2>
-          <p>{featuredProject.outcome}</p>
-        </div>
-        <NavAction target="projects" className="text-link">
-          Inspect mission
-        </NavAction>
-      </div>
+      <button
+        type="button"
+        className="scroll-cue"
+        onClick={() => navigateTo('about', { source: 'hero-cue' })}
+      >
+        <span>Scroll to enter</span>
+        <Icon name="chevron-down" size={16} />
+      </button>
     </section>
   );
 }

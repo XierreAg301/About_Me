@@ -3,17 +3,22 @@ import usePortfolioNavigation from './usePortfolioNavigation';
 import { PORTFOLIO_SECTIONS } from './portfolioSections';
 
 export default function MissionControlNav() {
-  const { activeSection, navigateTo } = usePortfolioNavigation();
+  const {
+    activeSection,
+    isPanelOpen,
+    navigateTo,
+    closePanel,
+  } = usePortfolioNavigation();
 
   return (
     <header className="mission-header">
       <a
         href="#hero"
         className="brand-mark"
-        aria-label={`${CONFIG.name}, home`}
+        aria-label={`${CONFIG.name}, return to the opening`}
         onClick={(event) => {
           event.preventDefault();
-          navigateTo('hero', { source: 'header' });
+          closePanel({ source: 'brand' });
         }}
       >
         <span>AA</span>
@@ -40,9 +45,19 @@ export default function MissionControlNav() {
         ))}
       </nav>
 
-      <a className="header-contact" href={`mailto:${CONFIG.email}`}>
-        INITIATE CONTACT
-      </a>
+      {isPanelOpen ? (
+        <button
+          type="button"
+          className="header-contact"
+          onClick={() => closePanel({ source: 'header' })}
+        >
+          BACK TO TOP
+        </button>
+      ) : (
+        <a className="header-contact" href={`mailto:${CONFIG.email}`}>
+          INITIATE CONTACT
+        </a>
+      )}
     </header>
   );
 }

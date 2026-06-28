@@ -18,7 +18,8 @@ export default function App() {
       // Storage can be unavailable in privacy-restricted browsing contexts.
     }
     window.requestAnimationFrame(() => {
-      document.getElementById('hero')?.focus({ preventScroll: true });
+      const focusTarget = document.getElementById('hero');
+      focusTarget?.focus({ preventScroll: true });
     });
   }, []);
 
