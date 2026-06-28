@@ -39,6 +39,7 @@ export function PortfolioNavigationProvider({ children }) {
       source = 'control',
       history = 'push',
       focusPanel = true,
+      scrollBehavior,
     } = options;
     const target = document.getElementById(id);
 
@@ -58,7 +59,7 @@ export function PortfolioNavigationProvider({ children }) {
       return;
     }
     target.scrollIntoView({
-      behavior: reducedMotion ? 'auto' : 'smooth',
+      behavior: scrollBehavior || (reducedMotion ? 'auto' : 'smooth'),
       block: 'start',
     });
 
@@ -74,6 +75,17 @@ export function PortfolioNavigationProvider({ children }) {
       }, reducedMotion ? 0 : 420);
     }
   }, [reducedMotion]);
+
+  useEffect(() => {
+    const initialSection = sectionFromHash();
+    if (initialSection === 'hero') return;
+    navigateTo(initialSection, {
+      source: 'initial',
+      history: 'none',
+      focusPanel: false,
+      scrollBehavior: 'auto',
+    });
+  }, [navigateTo]);
 
   useEffect(() => {
     const updateFromHistory = () => {

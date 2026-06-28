@@ -16,8 +16,8 @@ function CameraRig({ activeSection }) {
 
   useFrame(() => {
     const active = SECTION_BY_ID.get(activeSection) || PORTFOLIO_SECTIONS[0];
-    desiredPosition.set(active.position[0] * 0.08, active.position[1] * 0.06, 7.6);
-    desiredLookAt.set(active.position[0] * 0.1, active.position[1] * 0.08, 0);
+    desiredPosition.set(active.position[0] * 0.01, active.position[1] * 0.008, 7.6);
+    desiredLookAt.set(active.position[0] * 0.012, active.position[1] * 0.01, 0);
     camera.position.lerp(desiredPosition, 0.035);
     lookAt.current.lerp(desiredLookAt, 0.04);
     camera.lookAt(lookAt.current);

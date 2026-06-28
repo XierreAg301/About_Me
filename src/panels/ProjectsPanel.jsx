@@ -1,9 +1,27 @@
+import { useState } from 'react';
 import { CONFIG } from '../../config';
 import PanelSection from './PanelSection';
 
 function assetUrl(url) {
   if (!url?.startsWith('/')) return url;
   return `${import.meta.env.BASE_URL}${url.slice(1)}`;
+}
+
+function ProjectImageLink({ image, projectTitle, imageIndex }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+
+  const source = assetUrl(image);
+  return (
+    <a href={source} target="_blank" rel="noopener noreferrer">
+      <img
+        src={source}
+        alt={`${projectTitle} screenshot ${imageIndex + 1}`}
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    </a>
+  );
 }
 
 export default function ProjectsPanel() {
@@ -57,18 +75,12 @@ export default function ProjectsPanel() {
               {project.images?.length ? (
                 <div className="project-media">
                   {project.images.map((image, imageIndex) => (
-                    <a
-                      href={assetUrl(image)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <ProjectImageLink
+                      image={image}
+                      projectTitle={project.title}
+                      imageIndex={imageIndex}
                       key={image}
-                    >
-                      <img
-                        src={assetUrl(image)}
-                        alt={`${project.title} screenshot ${imageIndex + 1}`}
-                        loading="lazy"
-                      />
-                    </a>
+                    />
                   ))}
                 </div>
               ) : null}
