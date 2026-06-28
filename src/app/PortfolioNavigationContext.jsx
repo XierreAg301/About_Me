@@ -2,149 +2,91 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { isPortfolioSection, PORTFOLIO_SECTIONS } from './portfolioSections';
 import { PortfolioNavigationContext } from './portfolioNavigationState';
 import useReducedMotion from '../hooks/useReducedMotion';
 
-const FIRST_SECTION = PORTFOLIO_SECTIONS[0].id; // 'hero'
+const HOME_SECTION = PORTFOLIO_SECTIONS[0].id;
 
 function sectionFromHash() {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') return HOME_SECTION;
   const id = window.location.hash.replace(/^#/, '');
-  return isPortfolioSection(id) ? id : null;
+  return isPortfolioSection(id) ? id : HOME_SECTION;
 }
 
 function cleanUrl() {
   return `${window.location.pathname}${window.location.search}`;
 }
 
-/**
- * Scroll-driven navigation. The portfolio is now a vertical scroll story: the
- * 3D network is a fixed backdrop and each section flows down the page. The
- * "active" section is whatever the visitor has scrolled to (reported by an
- * IntersectionObserver in the shell). `navigateTo` smooth-scrolls to a section
- * and keeps the URL hash and history in sync. `isPanelOpen` is kept as a
- * derived flag (true once the visitor has scrolled past the hero) so the 3D
- * backdrop can fly the camera from the wide network view onto the active node.
- */
 export function PortfolioNavigationProvider({ children }) {
-  const [activeSection, setActiveSection] = useState(
-    () => sectionFromHash() || FIRST_SECTION
-  );
-  const [focusedSection, setFocusedSection] = useState(
-    () => sectionFromHash() || FIRST_SECTION
-  );
+  const [activeSection, setActiveSection] = useState(sectionFromHash);
+  const [focusedSection, setFocusedSection] = useState(sectionFromHash);
   const reducedMotion = useReducedMotion();
-  // While a programmatic scroll is animating, ignore observer reports so the
-  // target section stays "active" until the scroll settles.
-  const navLockRef = useRef(false);
-
-  const scrollToSection = useCallback((id, { smooth = true } = {}) => {
-    const element = document.getElementById(id);
-    if (!element) return;
-    element.scrollIntoView({
-      behavior: smooth && !reducedMotion ? 'smooth' : 'auto',
-      block: 'start',
-    });
-  }, [reducedMotion]);
 
   const focusMap = useCallback(() => {
-    document.getElementById('portfolio-map-nav')?.focus?.({ preventScroll: true });
-  }, []);
-
-  // Called by the scroll observer as sections cross the viewport centre.
-  const reportActiveSection = useCallback((id) => {
-    if (!isPortfolioSection(id) || navLockRef.current) return;
-    setActiveSection((previous) => {
-      if (previous === id) return previous;
-      const nextUrl = id === FIRST_SECTION ? cleanUrl() : `#${id}`;
-      window.history.replaceState({ section: id }, '', nextUrl);
-      return id;
+    document.getElementById('portfolio-globe-nav')?.focus?.({
+      preventScroll: true,
     });
-    setFocusedSection(id);
   }, []);
 
   const navigateTo = useCallback((id, options = {}) => {
     if (!isPortfolioSection(id)) return;
-    const { history = 'push' } = options;
-
+    const { history = 'push', focusPanel = true } = options;
     setActiveSection(id);
     setFocusedSection(id);
 
-    const targetHash = `#${id}`;
-    if (history !== 'none' && window.location.hash !== targetHash) {
-      const nextUrl = id === FIRST_SECTION ? cleanUrl() : targetHash;
+    if (history !== 'none') {
+      const nextUrl = id === HOME_SECTION ? cleanUrl() : `#${id}`;
+      const state = { section: id };
       if (history === 'replace') {
-        window.history.replaceState({ section: id }, '', nextUrl);
+        window.history.replaceState(state, '', nextUrl);
       } else {
-        window.history.pushState({ section: id }, '', nextUrl);
+        window.history.pushState(state, '', nextUrl);
       }
     }
 
-    navLockRef.current = true;
-    scrollToSection(id);
-    window.setTimeout(() => {
-      navLockRef.current = false;
-    }, reducedMotion ? 60 : 900);
-
-    // Move focus to the section for keyboard/screen-reader users without
-    // triggering a second scroll jump.
-    window.setTimeout(() => {
-      document.getElementById(id)?.focus?.({ preventScroll: true });
-    }, reducedMotion ? 0 : 620);
-  }, [reducedMotion, scrollToSection]);
+    if (id !== HOME_SECTION && focusPanel) {
+      window.setTimeout(() => {
+        document.getElementById(id)?.focus?.({ preventScroll: true });
+      }, reducedMotion ? 0 : 420);
+    }
+  }, [reducedMotion]);
 
   const closePanel = useCallback((options = {}) => {
-    navigateTo(FIRST_SECTION, { source: 'close', ...options });
-  }, [navigateTo]);
+    navigateTo(HOME_SECTION, { source: 'close', ...options });
+    window.setTimeout(focusMap, reducedMotion ? 0 : 260);
+  }, [focusMap, navigateTo, reducedMotion]);
 
-  // Browser history / manual hash edits -> scroll to the section.
   useEffect(() => {
-    const syncFromUrl = () => {
-      const id = sectionFromHash() || FIRST_SECTION;
-      navLockRef.current = true;
+    const syncFromHistory = () => {
+      const id = sectionFromHash();
       setActiveSection(id);
       setFocusedSection(id);
-      scrollToSection(id);
-      window.setTimeout(() => {
-        navLockRef.current = false;
-      }, reducedMotion ? 60 : 900);
     };
-
-    window.addEventListener('popstate', syncFromUrl);
-    window.addEventListener('hashchange', syncFromUrl);
+    window.addEventListener('popstate', syncFromHistory);
+    window.addEventListener('hashchange', syncFromHistory);
     return () => {
-      window.removeEventListener('popstate', syncFromUrl);
-      window.removeEventListener('hashchange', syncFromUrl);
+      window.removeEventListener('popstate', syncFromHistory);
+      window.removeEventListener('hashchange', syncFromHistory);
     };
-  }, [reducedMotion, scrollToSection]);
-
-  // Honour a deep link on first load once the sections have laid out.
-  useEffect(() => {
-    const id = sectionFromHash();
-    if (!id || id === FIRST_SECTION) return;
-    navLockRef.current = true;
-    window.requestAnimationFrame(() => scrollToSection(id, { smooth: false }));
-    const timer = window.setTimeout(() => {
-      navLockRef.current = false;
-    }, 400);
-    return () => window.clearTimeout(timer);
-    // Run once on mount only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const isPanelOpen = activeSection !== HOME_SECTION;
 
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === 'Escape') focusMap();
+      if (event.key !== 'Escape') return;
+      if (isPanelOpen) {
+        closePanel({ source: 'keyboard' });
+      } else {
+        focusMap();
+      }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [focusMap]);
-
-  const isPanelOpen = activeSection !== FIRST_SECTION;
+  }, [closePanel, focusMap, isPanelOpen]);
 
   const value = useMemo(() => ({
     activeSection,
@@ -152,7 +94,6 @@ export function PortfolioNavigationProvider({ children }) {
     isPanelOpen,
     reducedMotion,
     setFocusedSection,
-    reportActiveSection,
     navigateTo,
     closePanel,
     focusMap,
@@ -164,7 +105,6 @@ export function PortfolioNavigationProvider({ children }) {
     isPanelOpen,
     navigateTo,
     reducedMotion,
-    reportActiveSection,
   ]);
 
   return (

@@ -18,6 +18,7 @@ export default function PanelSection({
       tabIndex="-1"
       aria-labelledby={headingId}
       data-active={activeSection === id}
+      hidden={activeSection !== id}
       data-reveal=""
       className={`portfolio-panel story-reveal ${className}`}
     >

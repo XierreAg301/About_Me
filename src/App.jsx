@@ -18,7 +18,7 @@ export default function App() {
       // Storage can be unavailable in privacy-restricted browsing contexts.
     }
     window.requestAnimationFrame(() => {
-      const focusTarget = document.getElementById('hero');
+      const focusTarget = document.getElementById('portfolio-globe-nav');
       focusTarget?.focus({ preventScroll: true });
     });
   }, []);

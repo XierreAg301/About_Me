@@ -51,7 +51,7 @@ export default function MissionControlNav() {
           className="header-contact"
           onClick={() => closePanel({ source: 'header' })}
         >
-          BACK TO TOP
+          BACK TO GLOBE
         </button>
       ) : (
         <a className="header-contact" href={`mailto:${CONFIG.email}`}>

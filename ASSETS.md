@@ -31,7 +31,12 @@ geographic detail on the connected-world globe:
 
 | Asset | Usage | License / availability | Source |
 |-------|-------|------------------------|--------|
-| Blue Marble 2048 | Cyber-world surface map | Freely available to the public | [NASA Visible Earth](https://visibleearth.nasa.gov/images/57730/the-blue-marble-land-surface-ocean-color-and-sea-ice) |
+| Blue Marble Next Generation 5400×2700 | Red/silver cyber-world surface map embedded in the GLB | Freely available to the public; credit NASA Earth Observatory | [NASA Earth Observatory](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-topography-bathymetry/) |
+| NASA Earth 3D printable model | Base relief mesh for the interactive globe | Free to download and use under NASA media guidelines | [NASA 3D Resources](https://science.nasa.gov/3d-resources/earth/) |
+
+The NASA Earth STL was imported into Blender 5.1, reduced from 4,063,232 to
+90,000 faces, UV projected, shaded with a red/silver version of the map, and exported
+with a wire shell and orbit geometry as `public/models/hacker-earth.glb`.
 
 The remaining scene assets are original procedural work:
 
