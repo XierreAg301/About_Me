@@ -4,6 +4,8 @@ const CONFIG = {
   name: "Aaron Austin C. Amaro",
   title: "Full Stack Developer | Cybersecurity Specialist",
   organization: "University of Caloocan City",
+  tagline: "I build resilient backend systems, intelligent workflows, and interactive digital worlds.",
+  availability: "Open to internships, collaborative builds, and junior development opportunities.",
 
   // Profile photo — Google Drive direct-view link
   avatar: "https://lh3.googleusercontent.com/d/1wVLaANjOPyS_FSQpsdic8u79WRU2C6HB",
@@ -54,12 +56,66 @@ const CONFIG = {
     "Google Cloud", "HTML & CSS", "Tailwind CSS",
     "Git", "REST APIs", "Cybersecurity", "PostgreSQL",
   ],
+  skillClusters: [
+    {
+      name: "Frontend",
+      description: "Accessible, responsive interfaces that make complex systems easier to operate.",
+      skills: ["JavaScript", "TypeScript", "React", "Next.js", "HTML & CSS", "Tailwind CSS"],
+    },
+    {
+      name: "Backend",
+      description: "Service architecture, business logic, authentication, and API integration.",
+      skills: ["Node.js", "PHP", "Laravel", "Java", "Python", "C#", "REST APIs"],
+    },
+    {
+      name: "AI / Agents",
+      description: "Intelligent workflows and agent-oriented systems grounded in practical automation.",
+      skills: ["Python", "Node.js", "REST APIs"],
+    },
+    {
+      name: "Cybersecurity",
+      description: "Security-aware implementation, identity flows, and defensive system thinking.",
+      skills: ["Cybersecurity", "Git", "REST APIs"],
+    },
+    {
+      name: "Cloud / Data",
+      description: "Cloud-backed applications with reliable storage and real-time data services.",
+      skills: ["PostgreSQL", "Firebase", "Supabase", "Google Cloud"],
+    },
+    {
+      name: "Creative / Game Development",
+      description: "Interactive systems, procedural worlds, and gameplay mechanics built from code.",
+      skills: ["Unity", "p5.js", "C#", "JavaScript"],
+    },
+  ],
 
   // ── Education ───────────────────────────────────────────────
   education: [
     {
       degree: "Bachelor of Science in Computer Science",
       school: "University of Caloocan City",
+    },
+  ],
+  journey: [
+    {
+      year: "2022",
+      title: "Started Computer Science",
+      description: "Began the BSCS program at the University of Caloocan City.",
+    },
+    {
+      year: "2023",
+      title: "Built a Full-Stack Foundation",
+      description: "Developed practical experience across React, Node.js, and cloud platforms.",
+    },
+    {
+      year: "2024",
+      title: "Expanded into Cybersecurity and AI",
+      description: "Connected software engineering with security and intelligent automation.",
+    },
+    {
+      year: "2025",
+      title: "Delivered Production-Oriented Systems",
+      description: "Built procurement and emergency-response workflows for real operational needs.",
     },
   ],
 
@@ -83,6 +139,7 @@ const CONFIG = {
         "Developed distinct, role-based dashboards and secure authentication flows for Admin Assistants, Procurement Managers, and Suppliers, ensuring targeted data visibility for stock management and pending requests.",
         "Integrated dynamic PDF generation capabilities to instantly compile detailed inventory reports and standardized purchase requests, optimizing operational reporting across all managed locations.",
       ],
+      outcome: "Delivered role-based procurement, stock, and reporting workflows designed to support multiple branches.",
       featured: true,
     },
     {
@@ -95,6 +152,7 @@ const CONFIG = {
         "Designed a responsive, user-friendly dashboard for emergency responders utilizing Laravel Blade, HTML, and CSS to seamlessly visualize real-time safety statuses.",
         "Integrated Supabase as a cloud database solution within a Laravel (PHP) architecture, ensuring secure and immediate processing of incoming SMS and voice call responses.",
       ],
+      outcome: "Created a cloud-backed safety-status workflow that helps responders identify and escalate unresponsive cases.",
       featured: false,
     },
     {
@@ -107,6 +165,7 @@ const CONFIG = {
         "Architected and managed a scalable backend database using Firebase to efficiently store player progression, game states, and real-time data.",
         "Engineered secure user authentication by implementing Google Single Sign-On (SSO) to seamlessly handle player login and registration within the Unity foundation.",
       ],
+      outcome: "Connected authenticated players, simulated transactions, and persistent progression through a scalable game backend.",
       featured: false,
     },
     {
@@ -119,6 +178,7 @@ const CONFIG = {
         "Programmed fully destructible terrain and sandbox mechanics, utilizing array-based structures for efficient inventory and block management.",
         "Developed interactive gameplay systems, including a dynamic day/night cycle, enemy spawn logic, and a comprehensive crafting UI.",
       ],
+      outcome: "Produced a playable procedural sandbox with destructible terrain, crafting, inventory, and dynamic world systems.",
       featured: false,
     },
   ],
