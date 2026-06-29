@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import usePortfolioNavigation from '../app/usePortfolioNavigation';
 import useWebGLSupport from '../hooks/useWebGLSupport';
 import SceneErrorBoundary from './SceneErrorBoundary';
 import StaticNodeMap from './StaticNodeMap';
@@ -27,37 +26,57 @@ function useMobileViewport() {
  * from assistive tech and never captures pointer/scroll. As the visitor scrolls
  * the camera flies from the wide network view onto the active node.
  */
-export default function PortfolioWorldStage() {
+function OrbitalLoading() {
+  return (
+    <div className="orbital-loading" role="status" aria-live="polite">
+      <span />
+      <p>Calibrating orbital assets</p>
+    </div>
+  );
+}
+
+export default function PortfolioWorldStage({
+  phase,
+  worldNodes,
+  selectedWorldNode,
+  rotationCommand,
+  onWorldNodeSelect,
+  onMapNodeSelect,
+}) {
   const webGLSupported = useWebGLSupport();
-  const { isPanelOpen, reducedMotion } = usePortfolioNavigation();
   const [sceneFailed, setSceneFailed] = useState(false);
   const isMobile = useMobileViewport();
-  const useStaticMap = reducedMotion || webGLSupported !== true || sceneFailed;
+  const useStaticMap = webGLSupported === false || sceneFailed;
   const fallbackReason = webGLSupported === null
     ? 'checking'
-    : reducedMotion
-      ? 'reduced-motion'
-      : sceneFailed
+    : sceneFailed
         ? 'scene-error'
         : 'no-webgl';
 
   return (
     <div
-      className="world-stage"
-      data-panel-open={isPanelOpen}
-      aria-hidden="true"
+      className="world-stage orbital-world-stage"
+      data-phase={phase}
     >
       <div className="world-viewport">
-        {useStaticMap ? (
+        {webGLSupported === null ? (
+          <OrbitalLoading />
+        ) : useStaticMap ? (
           <StaticNodeMap reason={fallbackReason} />
         ) : (
           <SceneErrorBoundary
             onError={() => setSceneFailed(true)}
             fallback={<StaticNodeMap reason="scene-error" />}
           >
-            <Suspense fallback={<StaticNodeMap reason="loading" />}>
+            <Suspense fallback={<OrbitalLoading />}>
               <PortfolioWorld
                 isMobile={isMobile}
+                phase={phase}
+                worldNodes={worldNodes}
+                selectedWorldNode={selectedWorldNode}
+                rotationCommand={rotationCommand}
+                onWorldNodeSelect={onWorldNodeSelect}
+                onMapNodeSelect={onMapNodeSelect}
                 onContextLost={() => setSceneFailed(true)}
               />
             </Suspense>
