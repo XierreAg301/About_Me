@@ -8,7 +8,7 @@ import {
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { mesh as topoMesh } from 'topojson-client';
-import countries from 'world-atlas/countries-110m.json';
+import countriesUrl from 'world-atlas/countries-50m.json?url';
 import * as THREE from 'three';
 import {
   PORTFOLIO_CONNECTIONS,
@@ -19,10 +19,13 @@ import usePortfolioNavigation from '../app/usePortfolioNavigation';
 
 const BASE_URL = import.meta.env.BASE_URL;
 const GLOBE_URL = `${BASE_URL}models/digital-globe.glb?v=3`;
-const STATION_URL = `${BASE_URL}models/space-station-web.glb?v=1`;
+const STATION_URL = `${BASE_URL}models/space-station-web.glb?v=2`;
 const NODE_URL = `${BASE_URL}models/orbital-node.glb?v=1`;
-const CLOUD_URLS = [
-  `${BASE_URL}textures/cloud-field-6.png`,
+const EARTH_URL = `${BASE_URL}textures/nasa-black-marble-2016.jpg`;
+const TARGETING_SECONDS = 1.9;
+const DESCENT_SECONDS = 3.2;
+const ARRIVAL_SECONDS = 0.9;
+const DESCENT_CLOUD_URLS = [
   `${BASE_URL}textures/cloud-descent-01.png`,
   `${BASE_URL}textures/cloud-descent-02.png`,
   `${BASE_URL}textures/cloud-descent-03.png`,
@@ -79,41 +82,112 @@ function cloneAsset(source, cloneMaterials = false) {
 }
 
 function CountryBorders() {
-  const positions = useMemo(() => {
-    const borderMesh = topoMesh(
-      countries,
-      countries.objects.countries
-    );
-    const values = [];
-    borderMesh.coordinates.forEach((line) => {
-      for (let index = 1; index < line.length; index += 1) {
-        const start = coordinateToVector(line[index - 1][1], line[index - 1][0], 2.052);
-        const end = coordinateToVector(line[index][1], line[index][0], 2.052);
-        values.push(start.x, start.y, start.z, end.x, end.y, end.z);
-      }
-    });
-    return new Float32Array(values);
+  const [topology, setTopology] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch(countriesUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Country topology failed: ${response.status}`);
+        return response.json();
+      })
+      .then((value) => {
+        if (active) setTopology(value);
+      })
+      .catch(() => {
+        if (active) setTopology(null);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
+  const { coastlinePositions, borderPositions } = useMemo(() => {
+    if (!topology) {
+      return {
+        coastlinePositions: null,
+        borderPositions: null,
+      };
+    }
+
+    const toPositions = (mesh, radius) => {
+      const values = [];
+      mesh.coordinates.forEach((line) => {
+        for (let index = 1; index < line.length; index += 1) {
+          const start = coordinateToVector(
+            line[index - 1][1],
+            line[index - 1][0],
+            radius
+          );
+          const end = coordinateToVector(
+            line[index][1],
+            line[index][0],
+            radius
+          );
+          values.push(start.x, start.y, start.z, end.x, end.y, end.z);
+        }
+      });
+      return new Float32Array(values);
+    };
+
+    const coastlines = topoMesh(
+      topology,
+      topology.objects.countries,
+      (left, right) => left === right
+    );
+    const internalBorders = topoMesh(
+      topology,
+      topology.objects.countries,
+      (left, right) => left !== right
+    );
+
+    return {
+      coastlinePositions: toPositions(coastlines, 2.042),
+      borderPositions: toPositions(internalBorders, 2.043),
+    };
+  }, [topology]);
+
+  if (!coastlinePositions || !borderPositions) return null;
+
   return (
-    <lineSegments renderOrder={8}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          array={positions}
-          count={positions.length / 3}
-          itemSize={3}
+    <group>
+      <lineSegments renderOrder={8} raycast={() => null}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            array={borderPositions}
+            count={borderPositions.length / 3}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color="#b7cfcc"
+          transparent
+          opacity={0.24}
+          depthTest
+          depthWrite={false}
+          toneMapped={false}
         />
-      </bufferGeometry>
-      <lineBasicMaterial
-        color="#dbe9e5"
-        transparent
-        opacity={0.46}
-        depthTest
-        depthWrite={false}
-        toneMapped={false}
-      />
-    </lineSegments>
+      </lineSegments>
+      <lineSegments renderOrder={9} raycast={() => null}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            array={coastlinePositions}
+            count={coastlinePositions.length / 3}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color="#edf8f5"
+          transparent
+          opacity={0.54}
+          depthTest
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </lineSegments>
+    </group>
   );
 }
 
@@ -136,35 +210,44 @@ function CameraDirector({ phase, isMobile }) {
     const elapsed = (performance.now() - phaseStart.current) / 1000;
     let targetFov = isMobile ? 47 : 42;
 
-    if (phase === 'intro') {
-      desiredPosition.set(0, isMobile ? 0.15 : 0.2, isMobile ? 8.5 : 8.2);
-      desiredLookAt.set(0, 0, 0);
-      targetFov = isMobile ? 48 : 42;
-    } else if (phase === 'globe') {
+    if (phase === 'globe') {
       desiredPosition.set(0, 0.08, isMobile ? 8.1 : 7.8);
       desiredLookAt.set(0, 0, 0);
     } else if (phase === 'targeting') {
-      const progress = easeInOutCubic(Math.min(1, elapsed / 1.35));
+      const progress = easeInOutCubic(Math.min(1, elapsed / TARGETING_SECONDS));
       desiredPosition.set(0, 0.04, THREE.MathUtils.lerp(
         isMobile ? 8.1 : 7.8,
-        isMobile ? 6.6 : 5.9,
+        isMobile ? 6.1 : 5.2,
         progress
       ));
       desiredLookAt.set(0, 0, 0);
-      targetFov = THREE.MathUtils.lerp(42, 36, progress);
+      targetFov = THREE.MathUtils.lerp(isMobile ? 47 : 42, 34, progress);
     } else if (phase === 'descent') {
-      const progress = easeInOutCubic(Math.min(1, elapsed / 2.35));
-      desiredPosition.set(0, -progress * 0.55, THREE.MathUtils.lerp(5.9, 3.6, progress));
-      desiredLookAt.set(0, -progress * 0.8, -progress * 0.6);
-      targetFov = THREE.MathUtils.lerp(36, 62, progress);
+      const progress = easeInOutCubic(Math.min(1, elapsed / DESCENT_SECONDS));
+      desiredPosition.set(
+        0,
+        -progress * 0.34,
+        THREE.MathUtils.lerp(isMobile ? 6.1 : 5.2, isMobile ? 2.65 : 2.35, progress)
+      );
+      desiredLookAt.set(0, -progress * 0.24, -progress * 0.46);
+      targetFov = THREE.MathUtils.lerp(34, 70, progress);
+    } else if (phase === 'arrival') {
+      const progress = easeInOutCubic(Math.min(1, elapsed / ARRIVAL_SECONDS));
+      desiredPosition.set(
+        isMobile ? 0 : THREE.MathUtils.lerp(0, 0.4, progress),
+        THREE.MathUtils.lerp(0, 0.18, progress),
+        THREE.MathUtils.lerp(isMobile ? 13.8 : 13.2, isMobile ? 11.4 : 10.3, progress)
+      );
+      desiredLookAt.set(isMobile ? 0 : -0.45 * progress, 0, 0);
+      targetFov = THREE.MathUtils.lerp(62, isMobile ? 48 : 43, progress);
     } else {
       desiredPosition.set(isMobile ? 0 : 0.4, 0.18, isMobile ? 11.4 : 10.3);
       desiredLookAt.set(isMobile ? 0 : -0.45, 0, 0);
       targetFov = isMobile ? 48 : 43;
     }
 
-    camera.position.lerp(desiredPosition, smoothFactor(phase === 'descent' ? 5 : 3.4, delta));
-    lookAt.current.lerp(desiredLookAt, smoothFactor(4, delta));
+    camera.position.lerp(desiredPosition, smoothFactor(phase === 'descent' ? 6.2 : 4.2, delta));
+    lookAt.current.lerp(desiredLookAt, smoothFactor(4.8, delta));
     camera.lookAt(lookAt.current);
     camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, smoothFactor(4, delta));
     camera.updateProjectionMatrix();
@@ -173,56 +256,10 @@ function CameraDirector({ phase, isMobile }) {
   return null;
 }
 
-function StarField({ isMobile, phase }) {
-  const pointsRef = useRef(null);
-  const count = isMobile ? 320 : 720;
-  const positions = useMemo(() => {
-    const values = new Float32Array(count * 3);
-    let seed = 7127;
-    const random = () => {
-      seed = (seed * 16807) % 2147483647;
-      return (seed - 1) / 2147483646;
-    };
-
-    for (let index = 0; index < count; index += 1) {
-      const offset = index * 3;
-      values[offset] = (random() - 0.5) * 24;
-      values[offset + 1] = (random() - 0.5) * 15;
-      values[offset + 2] = -4 - random() * 22;
-    }
-    return values;
-  }, [count]);
-
-  useFrame((_, delta) => {
-    if (pointsRef.current && phase !== 'descent') {
-      pointsRef.current.rotation.y += delta * 0.005;
-    }
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          array={positions}
-          count={count}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#dbe8e5"
-        size={isMobile ? 0.025 : 0.032}
-        transparent
-        opacity={phase === 'network' ? 0.56 : 0.34}
-        depthWrite={false}
-      />
-    </points>
-  );
-}
-
 function WorldBeacons({
   nodes,
   template,
+  selectedNode,
   phase,
   onSelect,
 }) {
@@ -270,7 +307,9 @@ function WorldBeacons({
 
   if (phase === 'intro') return null;
 
-  return nodes.map((node, index) => (
+  return nodes.map((node, index) => {
+    if (phase !== 'globe' && node.id !== selectedNode?.id) return null;
+    return (
     <group
       key={`${node.id}-${node.code}`}
       ref={(element) => {
@@ -293,46 +332,8 @@ function WorldBeacons({
     >
       <primitive object={objects[index]} />
     </group>
-  ));
-}
-
-function CloudHalo({ texture, phase, isMobile }) {
-  const groupRef = useRef(null);
-  const opacity = phase === 'intro' ? 0.4 : phase === 'globe' ? 0.22 : 0.32;
-  const clouds = useMemo(() => [
-    { position: [-2.5, 1.5, 0.3], scale: [2.6, 1.55, 1], rotation: 0.12 },
-    { position: [2.35, 0.82, -0.6], scale: [2.2, 1.35, 1], rotation: -0.26 },
-    { position: [-1.8, -1.65, -0.25], scale: [2.45, 1.45, 1], rotation: -0.08 },
-    { position: [1.95, -1.5, 0.2], scale: [2.7, 1.5, 1], rotation: 0.28 },
-  ], []);
-
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    groupRef.current.rotation.z = Math.sin(clock.elapsedTime * 0.09) * 0.035;
+    );
   });
-
-  if (phase === 'descent' || phase === 'network') return null;
-
-  return (
-    <group ref={groupRef} scale={isMobile ? 0.82 : 1}>
-      {clouds.map((cloud, index) => (
-        <sprite
-          key={index}
-          position={cloud.position}
-          scale={cloud.scale}
-          rotation={[0, 0, cloud.rotation]}
-        >
-          <spriteMaterial
-            map={texture}
-            transparent
-            opacity={opacity}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </sprite>
-      ))}
-    </group>
-  );
 }
 
 function StationOrbit({ station, phase, isMobile }) {
@@ -341,11 +342,11 @@ function StationOrbit({ station, phase, isMobile }) {
 
   useFrame((_, delta) => {
     if (!orbitRef.current) return;
-    orbitRef.current.rotation.y += delta * (phase === 'intro' ? 0.13 : 0.08);
-    orbitRef.current.rotation.z += delta * 0.012;
+    orbitRef.current.rotation.y += delta * 0.055;
+    orbitRef.current.rotation.z += delta * 0.008;
   });
 
-  if (phase === 'descent' || phase === 'network') return null;
+  if (phase !== 'globe') return null;
 
   return (
     <group ref={orbitRef} rotation={[0.18, 0, -0.22]}>
@@ -361,6 +362,7 @@ function StationOrbit({ station, phase, isMobile }) {
 
 function InteractiveGlobe({
   globe,
+  earthTexture,
   nodeTemplate,
   nodes,
   selectedNode,
@@ -378,27 +380,35 @@ function InteractiveGlobe({
     const clone = cloneAsset(globe, true);
     clone.traverse((child) => {
       if (!child.isMesh) return;
+      child.raycast = () => null;
       if (child.name === 'GridSphere') {
         child.material = new THREE.MeshBasicMaterial({
           color: '#7fa9a8',
           transparent: true,
-          opacity: 0.14,
+          opacity: 0.08,
           wireframe: true,
           depthWrite: false,
         });
       }
       if (child.name === 'MapSphere') {
-        child.material.transparent = true;
-        child.material.opacity = 0.96;
-        child.material.emissiveIntensity = 0.78;
+        child.material = new THREE.MeshStandardMaterial({
+          map: earthTexture,
+          color: '#9bbfbd',
+          emissive: '#ffffff',
+          emissiveMap: earthTexture,
+          emissiveIntensity: 0.64,
+          metalness: 0.08,
+          roughness: 0.82,
+          transparent: false,
+          depthWrite: true,
+        });
       }
       if (child.name === 'OceanSphere') {
-        child.material.transparent = true;
-        child.material.opacity = 0.94;
+        child.visible = false;
       }
     });
     return clone;
-  }, [globe]);
+  }, [earthTexture, globe]);
 
   useEffect(() => {
     if (!rotationCommand) return;
@@ -420,6 +430,7 @@ function InteractiveGlobe({
 
   const handlePointerMove = useCallback((event) => {
     if (!dragging.current || phase !== 'globe') return;
+    event.stopPropagation();
     const deltaX = event.clientX - dragOrigin.current.x;
     const deltaY = event.clientY - dragOrigin.current.y;
     manualRotation.current.y = dragOrigin.current.rotationY + deltaX * 0.007;
@@ -428,6 +439,10 @@ function InteractiveGlobe({
       -0.82,
       0.82
     );
+    if (globeRef.current) {
+      globeRef.current.rotation.x = manualRotation.current.x;
+      globeRef.current.rotation.y = manualRotation.current.y;
+    }
   }, [phase]);
 
   const releasePointer = useCallback((event) => {
@@ -452,28 +467,33 @@ function InteractiveGlobe({
         smoothFactor(3.6, delta)
       );
     } else {
-      if (!dragging.current) {
-        manualRotation.current.y += delta * (phase === 'intro' ? 0.04 : 0.018);
+      if (dragging.current) {
+        globeRef.current.rotation.x = manualRotation.current.x;
+        globeRef.current.rotation.y = manualRotation.current.y;
+      } else {
+        manualRotation.current.y += delta * 0.014;
+        globeRef.current.rotation.x = lerpAngle(
+          globeRef.current.rotation.x,
+          manualRotation.current.x,
+          smoothFactor(9, delta)
+        );
+        globeRef.current.rotation.y = lerpAngle(
+          globeRef.current.rotation.y,
+          manualRotation.current.y,
+          smoothFactor(9, delta)
+        );
       }
-      globeRef.current.rotation.x = lerpAngle(
-        globeRef.current.rotation.x,
-        manualRotation.current.x,
-        smoothFactor(6, delta)
-      );
-      globeRef.current.rotation.y = lerpAngle(
-        globeRef.current.rotation.y,
-        manualRotation.current.y,
-        smoothFactor(6, delta)
-      );
     }
 
     const baseScale = isMobile ? 0.77 : 1;
     if (phase === 'descent') {
-      const progress = easeInOutCubic(Math.min(1, elapsed / 2.35));
-      globeRef.current.scale.setScalar(baseScale * THREE.MathUtils.lerp(1.16, 2.4, progress));
-      globeRef.current.position.y = -progress * 0.9;
+      const progress = easeInOutCubic(Math.min(1, elapsed / DESCENT_SECONDS));
+      globeRef.current.visible = progress < 0.62;
+      globeRef.current.scale.setScalar(baseScale * THREE.MathUtils.lerp(1.12, 2.85, progress));
+      globeRef.current.position.y = -progress * 0.72;
     } else {
-      const targetScale = baseScale * (phase === 'targeting' ? 1.16 : phase === 'intro' ? 0.9 : 1);
+      globeRef.current.visible = true;
+      const targetScale = baseScale * (phase === 'targeting' ? 1.12 : 1);
       const nextScale = THREE.MathUtils.lerp(
         globeRef.current.scale.x,
         targetScale,
@@ -488,21 +508,30 @@ function InteractiveGlobe({
     }
   });
 
-  if (phase === 'network') return null;
+  if (phase === 'arrival' || phase === 'network') return null;
 
   return (
-    <group
-      ref={globeRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={releasePointer}
-      onPointerCancel={releasePointer}
-    >
+    <group ref={globeRef}>
       <primitive object={globeObject} />
       <CountryBorders />
+      <mesh
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={releasePointer}
+        onPointerCancel={releasePointer}
+      >
+        <sphereGeometry args={[GLOBE_RADIUS, 32, 18]} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          colorWrite={false}
+        />
+      </mesh>
       <WorldBeacons
         nodes={nodes}
         template={nodeTemplate}
+        selectedNode={selectedNode}
         phase={phase}
         onSelect={onNodeSelect}
       />
@@ -515,16 +544,19 @@ function DescentClouds({ textures, phase, reducedMotion }) {
   const materials = useRef([]);
   const phaseStart = usePhaseStart(phase);
   const setup = useMemo(() => [
-    { position: [-2.3, 1.4, 1.7], scale: [3.8, 2.5, 1], delay: 0 },
-    { position: [2.1, -0.9, 2.45], scale: [4.3, 2.8, 1], delay: 0.12 },
-    { position: [-0.5, 0.15, 3.05], scale: [4.8, 3.1, 1], delay: 0.24 },
+    { position: [-2.4, 1.35, 0.2], scale: [2.55, 1.65, 1], delay: 0 },
+    { position: [2.2, -1, 0.55], scale: [2.8, 1.8, 1], delay: 0.11 },
+    { position: [-0.55, 0.1, 0.9], scale: [3.15, 2.05, 1], delay: 0.23 },
+    { position: [2.45, 1.2, 0.25], scale: [2.6, 1.7, 1], delay: 0.36 },
+    { position: [-2.3, -1.15, 0.7], scale: [2.95, 1.9, 1], delay: 0.49 },
+    { position: [0.3, 0.45, 1.05], scale: [3.3, 2.15, 1], delay: 0.62 },
   ], []);
 
   useFrame(() => {
     if (phase !== 'descent') return;
     const raw = reducedMotion
       ? 1
-      : Math.min(1, (performance.now() - phaseStart.current) / 2350);
+      : Math.min(1, (performance.now() - phaseStart.current) / (DESCENT_SECONDS * 1000));
     setup.forEach((item, index) => {
       const sprite = sprites.current[index];
       const material = materials.current[index];
@@ -534,11 +566,11 @@ function DescentClouds({ textures, phase, reducedMotion }) {
       sprite.position.set(
         item.position[0] + Math.sin(progress * Math.PI) * (index - 1) * 0.5,
         item.position[1] + (0.5 - index * 0.2) * progress,
-        item.position[2] + progress * 4.8
+        item.position[2] + progress * 4.6
       );
-      const scale = 1 + progress * 2.8;
+      const scale = 1 + progress * 2;
       sprite.scale.set(item.scale[0] * scale, item.scale[1] * scale, 1);
-      material.opacity = Math.sin(local * Math.PI) * 0.92;
+      material.opacity = Math.sin(local * Math.PI) * 0.78;
     });
   });
 
@@ -558,7 +590,7 @@ function DescentClouds({ textures, phase, reducedMotion }) {
         ref={(material) => {
           materials.current[index] = material;
         }}
-        map={textures[index]}
+        map={textures[index % textures.length]}
         transparent
         opacity={0}
         depthTest={false}
@@ -569,10 +601,87 @@ function DescentClouds({ textures, phase, reducedMotion }) {
   ));
 }
 
+function DescentVelocity({ phase, reducedMotion }) {
+  const geometryRef = useRef(null);
+  const materialRef = useRef(null);
+  const phaseStart = usePhaseStart(phase);
+  const positions = useMemo(() => {
+    const values = new Float32Array(72 * 6);
+    let seed = 8173;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    for (let index = 0; index < 72; index += 1) {
+      const angle = random() * Math.PI * 2;
+      const radius = 0.85 + random() * 4.8;
+      const z = -3.5 + random() * 7;
+      const length = 0.35 + random() * 1.15;
+      const offset = index * 6;
+      values[offset] = Math.cos(angle) * radius;
+      values[offset + 1] = Math.sin(angle) * radius;
+      values[offset + 2] = z;
+      values[offset + 3] = Math.cos(angle) * radius;
+      values[offset + 4] = Math.sin(angle) * radius;
+      values[offset + 5] = z + length;
+    }
+    return values;
+  }, []);
+
+  useFrame((_, delta) => {
+    if (phase !== 'descent' || !geometryRef.current || !materialRef.current) return;
+    const progress = reducedMotion
+      ? 1
+      : Math.min(1, (performance.now() - phaseStart.current) / (DESCENT_SECONDS * 1000));
+    const attribute = geometryRef.current.attributes.position;
+    for (let index = 0; index < attribute.count; index += 2) {
+      let startZ = attribute.getZ(index) + delta * (5 + progress * 13);
+      let endZ = attribute.getZ(index + 1) + delta * (5 + progress * 13);
+      if (startZ > 5.2) {
+        const length = endZ - startZ;
+        startZ = -4.2;
+        endZ = startZ + length;
+      }
+      attribute.setZ(index, startZ);
+      attribute.setZ(index + 1, endZ);
+    }
+    attribute.needsUpdate = true;
+    materialRef.current.opacity = Math.sin(progress * Math.PI) * 0.52;
+  });
+
+  if (phase !== 'descent') return null;
+
+  return (
+    <lineSegments renderOrder={18}>
+      <bufferGeometry ref={geometryRef}>
+        <bufferAttribute
+          attach="attributes-position"
+          array={positions}
+          count={positions.length / 3}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <lineBasicMaterial
+        ref={materialRef}
+        color="#d8f4ef"
+        transparent
+        opacity={0}
+        depthTest={false}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </lineSegments>
+  );
+}
+
 function NetworkConstellation({ nodeTemplate, phase, onNodeSelect }) {
   const { activeSection, reducedMotion } = usePortfolioNavigation();
   const groupRef = useRef(null);
+  const lineMaterialRef = useRef(null);
   const nodeRefs = useRef([]);
+  const phaseStart = usePhaseStart(phase);
   const [hovered, setHovered] = useState(null);
   const objects = useMemo(
     () => PORTFOLIO_SECTIONS.map(() => cloneAsset(nodeTemplate, true)),
@@ -598,10 +707,30 @@ function NetworkConstellation({ nodeTemplate, phase, onNodeSelect }) {
   }, [hovered]);
 
   useFrame((state, delta) => {
-    if (!groupRef.current || phase !== 'network') return;
+    if (!groupRef.current || (phase !== 'arrival' && phase !== 'network')) return;
     const activePosition = activeMeta.position;
     const targetX = -activePosition[0] - (state.size.width > 980 ? 1.25 : 0);
     const targetY = -activePosition[1];
+    const arrivalProgress = phase === 'arrival'
+      ? easeInOutCubic(Math.min(
+        1,
+        (performance.now() - phaseStart.current) / (ARRIVAL_SECONDS * 1000)
+      ))
+      : 1;
+
+    if (phase === 'arrival') {
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(0.12, 1, arrivalProgress));
+      groupRef.current.position.z = THREE.MathUtils.lerp(-8, 0, arrivalProgress);
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(-0.34, 0, arrivalProgress);
+      groupRef.current.rotation.z = THREE.MathUtils.lerp(0.16, 0, arrivalProgress);
+    } else {
+      groupRef.current.scale.setScalar(1);
+      groupRef.current.position.z = 0;
+      groupRef.current.rotation.z = 0;
+    }
+    if (lineMaterialRef.current) {
+      lineMaterialRef.current.opacity = arrivalProgress * 0.32;
+    }
     groupRef.current.position.x = THREE.MathUtils.lerp(
       groupRef.current.position.x,
       targetX,
@@ -612,7 +741,7 @@ function NetworkConstellation({ nodeTemplate, phase, onNodeSelect }) {
       targetY,
       smoothFactor(2.8, delta)
     );
-    if (!reducedMotion) {
+    if (!reducedMotion && phase === 'network') {
       groupRef.current.rotation.y = THREE.MathUtils.lerp(
         groupRef.current.rotation.y,
         state.pointer.x * 0.055,
@@ -641,7 +770,7 @@ function NetworkConstellation({ nodeTemplate, phase, onNodeSelect }) {
     });
   });
 
-  if (phase !== 'network') return null;
+  if (phase !== 'arrival' && phase !== 'network') return null;
 
   return (
     <group ref={groupRef}>
@@ -655,9 +784,10 @@ function NetworkConstellation({ nodeTemplate, phase, onNodeSelect }) {
           />
         </bufferGeometry>
         <lineBasicMaterial
+          ref={lineMaterialRef}
           color="#91aaa7"
           transparent
-          opacity={0.32}
+          opacity={phase === 'arrival' ? 0 : 0.32}
           depthWrite={false}
         />
       </lineSegments>
@@ -702,29 +832,32 @@ function WorldScene({
     GLTFLoader,
     [GLOBE_URL, STATION_URL, NODE_URL]
   );
-  const textures = useLoader(THREE.TextureLoader, CLOUD_URLS);
-  const cloudFieldTexture = textures[0];
-  const descentTextures = textures.slice(1);
+  const earthTexture = useLoader(THREE.TextureLoader, EARTH_URL);
+  const descentTextures = useLoader(THREE.TextureLoader, DESCENT_CLOUD_URLS);
 
   useEffect(() => {
-    textures.forEach((texture) => {
+    earthTexture.colorSpace = THREE.SRGBColorSpace;
+    earthTexture.flipY = false;
+    earthTexture.wrapS = THREE.RepeatWrapping;
+    earthTexture.anisotropy = 4;
+    earthTexture.needsUpdate = true;
+    descentTextures.forEach((texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.needsUpdate = true;
     });
-  }, [textures]);
+  }, [descentTextures, earthTexture]);
 
   const nodeTemplate = nodeModel.scene.getObjectByName('OrbitalNode');
 
   return (
     <>
-      <color attach="background" args={['#000000']} />
-      <fog attach="fog" args={['#000000', 12, 28]} />
+      <fog attach="fog" args={['#030507', 14, 30]} />
       <hemisphereLight args={['#d8e5e1', '#020304', 0.72]} />
       <directionalLight color="#f5efe8" intensity={1.45} position={[4, 6, 7]} />
       <directionalLight color="#d7793c" intensity={0.5} position={[-4, -2, 3]} />
-      <StarField isMobile={isMobile} phase={phase} />
       <InteractiveGlobe
         globe={globeModel.scene}
+        earthTexture={earthTexture}
         nodeTemplate={nodeTemplate}
         nodes={worldNodes}
         selectedNode={selectedWorldNode}
@@ -733,7 +866,6 @@ function WorldScene({
         isMobile={isMobile}
         onNodeSelect={onWorldNodeSelect}
       />
-      <CloudHalo texture={cloudFieldTexture} phase={phase} isMobile={isMobile} />
       <StationOrbit
         station={stationModel.scene}
         phase={phase}
@@ -744,6 +876,7 @@ function WorldScene({
         phase={phase}
         reducedMotion={reducedMotion}
       />
+      <DescentVelocity phase={phase} reducedMotion={reducedMotion} />
       <NetworkConstellation
         nodeTemplate={nodeTemplate}
         phase={phase}
@@ -780,11 +913,12 @@ export default function PortfolioWorld({
         dpr={isMobile ? 1 : [1, 1.4]}
         performance={{ min: 0.55 }}
         gl={{
-          alpha: false,
+          alpha: true,
           antialias: !isMobile,
           powerPreference: 'high-performance',
         }}
         onCreated={({ gl }) => {
+          gl.setClearColor(0x030507, 0);
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 0.94;
           gl.outputColorSpace = THREE.SRGBColorSpace;

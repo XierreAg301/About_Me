@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CONFIG } from '../../config';
 import { PORTFOLIO_SECTIONS, SECTION_BY_ID } from './portfolioSections';
 import usePortfolioNavigation from './usePortfolioNavigation';
 import PortfolioWorldStage from '../experience/PortfolioWorldStage';
@@ -12,24 +11,10 @@ import ProjectsPanel from '../panels/ProjectsPanel';
 import CertificatesPanel from '../panels/CertificatesPanel';
 import ContactPanel from '../panels/ContactPanel';
 
-const CLOUD_DESCENT_URLS = [
-  `${import.meta.env.BASE_URL}textures/cloud-descent-01.png`,
-  `${import.meta.env.BASE_URL}textures/cloud-descent-02.png`,
-  `${import.meta.env.BASE_URL}textures/cloud-descent-03.png`,
-];
-
-function IntroCopy({ onEnter }) {
-  return (
-    <section className="orbital-intro-copy" aria-labelledby="orbital-title">
-      <p>ORBITAL PORTFOLIO / 2026</p>
-      <h1 id="orbital-title">{CONFIG.name}</h1>
-      <span>{CONFIG.title}</span>
-      <button id="orbital-entry-button" type="button" onClick={onEnter}>
-        Enter the signal field
-      </button>
-    </section>
-  );
-}
+const SPACE_BACKGROUND_URL = `${import.meta.env.BASE_URL}textures/nasa-deep-star-map-2020.jpg`;
+const TARGETING_DURATION = 1900;
+const DESCENT_DURATION = 3200;
+const ARRIVAL_DURATION = 900;
 
 function GlobeControls({
   nodes,
@@ -90,33 +75,42 @@ function GlobeControls({
 function TransitionReadout({ phase, selectedNode, onSkip }) {
   return (
     <>
-      {phase === 'descent' && (
-        <div className="orbital-descent-clouds" aria-hidden="true">
-          {CLOUD_DESCENT_URLS.map((url, index) => (
-            <span
-              key={url}
-              style={{
-                '--cloud-image': `url("${url}")`,
-                '--cloud-index': index,
-              }}
-            />
-          ))}
-        </div>
-      )}
-      <section className="orbital-transition-readout" aria-live="polite">
-        <p>{phase === 'targeting' ? 'ACQUIRING SIGNAL' : 'ATMOSPHERIC ENTRY'}</p>
-        <strong>{selectedNode?.country ?? 'UNKNOWN VECTOR'}</strong>
-        <span>
-          {selectedNode
-            ? `${selectedNode.latitude.toFixed(4)} / ${selectedNode.longitude.toFixed(4)}`
-            : 'CALCULATING'}
-        </span>
-        <i aria-hidden="true" />
-        <button type="button" onClick={onSkip}>
-          Skip transition
-        </button>
-      </section>
+      {phase === 'targeting' ? (
+        <section className="orbital-transition-readout" aria-live="polite">
+          <strong>{selectedNode?.country ?? 'UNKNOWN VECTOR'}</strong>
+          <span>
+            {selectedNode
+              ? `${selectedNode.latitude.toFixed(4)} / ${selectedNode.longitude.toFixed(4)}`
+              : 'CALCULATING'}
+          </span>
+          <i aria-hidden="true" />
+        </section>
+      ) : null}
+      <button
+        type="button"
+        className="orbital-transition-skip"
+        onClick={onSkip}
+        aria-keyshortcuts="Escape Space"
+      >
+        <span aria-hidden="true">→</span>
+        Skip transition
+      </button>
     </>
+  );
+}
+
+function CinematicTransitionFx({ phase }) {
+  return (
+    <div
+      className="orbital-cinematic-fx"
+      data-stage={phase}
+      aria-hidden="true"
+    >
+      <i className="orbital-cinematic-atmosphere" />
+      <i className="orbital-cinematic-velocity" />
+      <i className="orbital-cinematic-flash" />
+      <i className="orbital-cinematic-blackout" />
+    </div>
   );
 }
 
@@ -231,7 +225,7 @@ export default function PortfolioShell() {
   const [worldNodes] = useState(createRandomWorldNodes);
   const [selectedWorldNode, setSelectedWorldNode] = useState(null);
   const [phase, setPhase] = useState(
-    () => (typeof window !== 'undefined' && window.location.hash ? 'network' : 'intro')
+    () => (typeof window !== 'undefined' && window.location.hash ? 'network' : 'globe')
   );
   const [decoderOpen, setDecoderOpen] = useState(
     () => typeof window !== 'undefined' && Boolean(window.location.hash)
@@ -239,7 +233,11 @@ export default function PortfolioShell() {
   const [rotationCommand, setRotationCommand] = useState(null);
 
   const activeMeta = SECTION_BY_ID.get(activeSection) ?? PORTFOLIO_SECTIONS[0];
-  const phaseIsTransition = phase === 'targeting' || phase === 'descent';
+  const phaseIsTransition = (
+    phase === 'targeting'
+    || phase === 'descent'
+    || phase === 'arrival'
+  );
 
   useEffect(() => {
     document.title = 'Aaron Austin C. Amaro | Orbital Portfolio';
@@ -249,7 +247,7 @@ export default function PortfolioShell() {
     if (phase !== 'targeting') return undefined;
     const timeout = window.setTimeout(
       () => setPhase(reducedMotion ? 'network' : 'descent'),
-      reducedMotion ? 80 : 1350
+      reducedMotion ? 80 : TARGETING_DURATION
     );
     return () => window.clearTimeout(timeout);
   }, [phase, reducedMotion]);
@@ -257,19 +255,18 @@ export default function PortfolioShell() {
   useEffect(() => {
     if (phase !== 'descent') return undefined;
     const timeout = window.setTimeout(() => {
-      setPhase('network');
+      setPhase('arrival');
       setDecoderOpen(false);
       navigateTo('hero', { history: 'replace', focusPanel: false });
-    }, 2350);
+    }, DESCENT_DURATION);
     return () => window.clearTimeout(timeout);
   }, [navigateTo, phase]);
 
-  const enterSignalField = useCallback(() => {
-    setPhase('globe');
-    window.requestAnimationFrame(() => {
-      document.getElementById('portfolio-globe-nav')?.focus({ preventScroll: true });
-    });
-  }, []);
+  useEffect(() => {
+    if (phase !== 'arrival') return undefined;
+    const timeout = window.setTimeout(() => setPhase('network'), ARRIVAL_DURATION);
+    return () => window.clearTimeout(timeout);
+  }, [phase]);
 
   const selectWorldNode = useCallback((node) => {
     if (phase !== 'globe') return;
@@ -282,6 +279,17 @@ export default function PortfolioShell() {
     setDecoderOpen(false);
     navigateTo('hero', { history: 'replace', focusPanel: false });
   }, [navigateTo]);
+
+  useEffect(() => {
+    if (!phaseIsTransition) return undefined;
+    const handleTransitionKey = (event) => {
+      if (event.key !== 'Escape' && event.code !== 'Space') return;
+      event.preventDefault();
+      enterNetwork();
+    };
+    window.addEventListener('keydown', handleTransitionKey);
+    return () => window.removeEventListener('keydown', handleTransitionKey);
+  }, [enterNetwork, phaseIsTransition]);
 
   const selectMapNode = useCallback((sectionId) => {
     navigateTo(sectionId, { source: 'node-map', focusPanel: false });
@@ -314,6 +322,12 @@ export default function PortfolioShell() {
         Skip immersive navigation
       </a>
 
+      <div
+        className="orbital-space-background"
+        style={{ '--space-background': `url("${SPACE_BACKGROUND_URL}")` }}
+        aria-hidden="true"
+      />
+
       <PortfolioWorldStage
         phase={phase}
         worldNodes={worldNodes}
@@ -323,24 +337,23 @@ export default function PortfolioShell() {
         onMapNodeSelect={selectMapNode}
       />
 
-      {phase === 'intro' ? <IntroCopy onEnter={enterSignalField} /> : null}
-
       {phase === 'globe' ? (
-        <div id="portfolio-globe-nav" tabIndex="-1">
-          <GlobeControls
-            nodes={worldNodes}
-            onNodeSelect={selectWorldNode}
-            onRotate={nudgeRotation}
-          />
-        </div>
+        <GlobeControls
+          nodes={worldNodes}
+          onNodeSelect={selectWorldNode}
+          onRotate={nudgeRotation}
+        />
       ) : null}
 
       {phaseIsTransition ? (
-        <TransitionReadout
-          phase={phase}
-          selectedNode={selectedWorldNode}
-          onSkip={enterNetwork}
-        />
+        <>
+          <CinematicTransitionFx phase={phase} />
+          <TransitionReadout
+            phase={phase}
+            selectedNode={selectedWorldNode}
+            onSkip={enterNetwork}
+          />
+        </>
       ) : null}
 
       {phase === 'network' ? (
@@ -371,13 +384,11 @@ export default function PortfolioShell() {
       </div>
 
       <div className="sr-only" aria-live="polite">
-        {phase === 'intro'
-          ? 'Orbital portfolio ready.'
-          : phase === 'globe'
-            ? 'Five global signals available.'
-            : phaseIsTransition
-              ? `Traveling to ${selectedWorldNode?.country ?? 'selected node'}.`
-              : `${activeMeta.label} portfolio node selected.`}
+        {phase === 'globe'
+          ? 'Five global signals available.'
+          : phaseIsTransition
+            ? `Traveling to ${selectedWorldNode?.country ?? 'selected node'}.`
+            : `${activeMeta.label} portfolio node selected.`}
       </div>
     </div>
   );

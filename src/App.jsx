@@ -18,9 +18,7 @@ export default function App() {
       // Storage can be unavailable in privacy-restricted browsing contexts.
     }
     window.requestAnimationFrame(() => {
-      const focusTarget =
-        document.getElementById('orbital-entry-button') ??
-        document.getElementById('portfolio-globe-nav');
+      const focusTarget = document.getElementById('portfolio-globe-nav');
       focusTarget?.focus({ preventScroll: true });
     });
   }, []);

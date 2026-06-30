@@ -217,19 +217,21 @@ def prepare_station():
     meshes = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
 
     main_mesh = max(meshes, key=lambda item: len(item.data.polygons))
-    if len(main_mesh.data.polygons) > 100_000:
-        modifier = main_mesh.modifiers.new("Web decimation", "DECIMATE")
-        modifier.ratio = 0.34
+    for obj in meshes:
+        if len(obj.data.polygons) <= 20_000:
+            continue
+        modifier = obj.modifiers.new("Web decimation", "DECIMATE")
+        modifier.ratio = 0.18 if obj == main_mesh else 0.35
         modifier.use_collapse_triangulate = True
-        bpy.context.view_layer.objects.active = main_mesh
-        main_mesh.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
         bpy.ops.object.modifier_apply(modifier=modifier.name)
-        main_mesh.select_set(False)
+        obj.select_set(False)
 
     for image in bpy.data.images:
         if image.size[0] <= 0 or image.size[1] <= 0:
             continue
-        maximum = 1024 if max(image.size) >= 4096 else 768
+        maximum = 512
         ratio = maximum / max(image.size)
         if ratio < 1:
             image.scale(
