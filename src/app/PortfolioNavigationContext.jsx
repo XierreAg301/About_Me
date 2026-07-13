@@ -26,7 +26,9 @@ export function PortfolioNavigationProvider({ children }) {
   const reducedMotion = useReducedMotion();
 
   const focusMap = useCallback(() => {
-    document.getElementById('portfolio-globe-nav')?.focus?.({
+    const focusTarget = document.getElementById('orbital-map-overview')
+      ?? document.getElementById('portfolio-globe-nav');
+    focusTarget?.focus?.({
       preventScroll: true,
     });
   }, []);

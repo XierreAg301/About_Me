@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 .Tools/*
 Tools/
+
+# Reproducible Blender authoring and review output
+public/models/aurora-orbs/*.blend
+public/models/aurora-orbs/*.blend1
+public/models/aurora-orbs/*-preview.png
+public/models/aurora-orbs/*-motion-*.png
+public/models/aurora-orbs/*.mp4
+__pycache__/
+*.py[cod]

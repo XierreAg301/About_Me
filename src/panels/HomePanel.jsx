@@ -50,7 +50,7 @@ export default function HomePanel() {
             <Icon name="arrow-up-right" size={16} />
           </NavAction>
           <NavAction target="about" className="action-secondary">
-            Enter the network
+            Explore approach
             <Icon name="chevron-down" size={16} />
           </NavAction>
         </div>

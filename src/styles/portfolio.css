@@ -4531,3 +4531,939 @@ body:has(.orbital-shell),
     animation: none;
   }
 }
+
+/* The Blender constellation replaces the legacy flat node overlay. */
+.orbital-artifact-canvas {
+  pointer-events: auto;
+}
+
+.orbital-artifact-canvas canvas {
+  cursor: crosshair;
+}
+
+.orbital-map-instructions {
+  position: fixed;
+  bottom: clamp(1.8rem, 4vw, 3.5rem);
+  left: clamp(1.5rem, 5vw, 5rem);
+  z-index: 40;
+  margin: 0;
+  color: rgba(182, 188, 203, 0.72);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.orbital-map-instructions::before {
+  display: inline-block;
+  width: 34px;
+  height: 1px;
+  margin-right: 0.65rem;
+  background: var(--active-node-accent);
+  vertical-align: middle;
+  content: '';
+}
+
+.orbital-shell[data-decoder-open='true'] .orbital-map-instructions {
+  opacity: 0.2;
+}
+
+.static-artifact-fallback {
+  position: absolute;
+  inset: 9% 10% 8%;
+}
+
+.static-artifact-fallback svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.static-artifact-links line {
+  stroke: rgba(133, 115, 160, 0.3);
+  stroke-width: 0.08;
+  vector-effect: non-scaling-stroke;
+}
+
+.static-artifact-nodes circle:first-child {
+  filter: drop-shadow(0 0 6px rgba(181, 108, 255, 0.52));
+}
+
+.static-artifact-ring {
+  fill: none;
+  stroke: rgba(247, 244, 255, 0.3);
+  stroke-width: 0.15;
+  vector-effect: non-scaling-stroke;
+}
+
+.static-artifact-nodes .is-active .static-artifact-ring {
+  stroke: #f7f4ff;
+  stroke-width: 0.32;
+}
+
+@media (max-width: 640px) {
+  .orbital-map-instructions {
+    right: 1rem;
+    bottom: calc(env(safe-area-inset-bottom) + 8.6rem);
+    left: 1rem;
+    text-align: center;
+  }
+}
+
+/* Clean globe-to-artifact handoff: black bridge, then the neon 3D dossier. */
+.orbital-cinematic-atmosphere,
+.orbital-cinematic-velocity,
+.orbital-cinematic-flash {
+  display: none !important;
+}
+
+.orbital-cinematic-blackout {
+  background: #020204;
+}
+
+.orbital-cinematic-fx[data-stage='descent'] .orbital-cinematic-blackout {
+  animation: orbital-dark-bridge 3.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.orbital-cinematic-fx[data-stage='arrival'] .orbital-cinematic-blackout {
+  animation: orbital-dark-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes orbital-dark-bridge {
+  0%, 64% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes orbital-dark-reveal {
+  0%, 10% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.orbital-phase-arrival,
+.orbital-phase-network {
+  background: #020204;
+}
+
+.orbital-phase-arrival .orbital-space-background,
+.orbital-phase-network .orbital-space-background {
+  opacity: 0;
+}
+
+.orbital-world-stage[data-phase='arrival'] .orbital-loading,
+.orbital-world-stage[data-phase='network'] .orbital-loading {
+  background: #020204;
+  color: #9e97aa;
+}
+
+.orbital-world-stage[data-phase='arrival'] .orbital-loading > span,
+.orbital-world-stage[data-phase='network'] .orbital-loading > span {
+  border-color: rgba(255, 255, 255, 0.14);
+  border-top-color: var(--active-node-accent);
+}
+
+.orbital-phase-arrival::before,
+.orbital-phase-network::before {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 38%, rgba(0, 0, 0, 0.5) 100%),
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+}
+
+.orbital-world-canvas[data-phase='arrival'] {
+  pointer-events: none;
+}
+
+.orbital-phase-arrival .orbital-transition-skip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.orbital-phase-network .orbital-network-header {
+  border-bottom-color: rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(2, 2, 4, 0.94), rgba(2, 2, 4, 0));
+}
+
+.orbital-phase-network .orbital-network-header > a,
+.orbital-phase-network .orbital-network-header > a > strong {
+  color: #f8f6ff;
+}
+
+.orbital-phase-network .orbital-network-header > a > span {
+  border-color: color-mix(in srgb, var(--active-node-accent) 72%, transparent);
+  color: var(--active-node-accent);
+}
+
+.orbital-phase-network .orbital-network-header > p {
+  color: #9a94a5;
+}
+
+.orbital-phase-network .orbital-network-header > button,
+.orbital-phase-network .orbital-node-readout button {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(5, 5, 9, 0.72);
+  color: #f8f6ff;
+}
+
+.orbital-phase-network .orbital-network-header > button:hover,
+.orbital-phase-network .orbital-network-header > button:focus-visible,
+.orbital-phase-network .orbital-node-readout button:hover,
+.orbital-phase-network .orbital-node-readout button:focus-visible {
+  border-color: var(--active-node-accent);
+  background: color-mix(in srgb, var(--active-node-accent) 13%, #050509);
+  color: #fff;
+}
+
+.orbital-phase-network .orbital-node-readout > p {
+  color: var(--active-node-accent);
+}
+
+.orbital-phase-network .orbital-node-readout h2 {
+  color: #fff;
+}
+
+.orbital-phase-network .orbital-node-readout > span {
+  color: #aaa5b5;
+}
+
+.orbital-phase-network .orbital-map-instructions {
+  color: rgba(224, 220, 232, 0.66);
+}
+
+.orbital-phase-network .orbital-frame {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.orbital-phase-network .orbital-frame > i {
+  border-color: color-mix(in srgb, var(--active-node-accent) 72%, transparent);
+}
+
+.orbital-phase-network .orbital-node-readout {
+  animation: node-dossier-in 780ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes node-dossier-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-20px, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Network index -> editorial page system. The index owns the constellation;
+   page views own a single artifact and never render connection lines. */
+.orbital-map-overview {
+  position: fixed;
+  top: clamp(7rem, 15vh, 9.5rem);
+  left: clamp(1.5rem, 5vw, 5rem);
+  z-index: 40;
+  width: min(360px, 29vw);
+  outline: none;
+  animation: orbital-interface-arrival 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
+}
+
+.orbital-map-overview > p {
+  margin: 0;
+  color: var(--active-node-accent);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.orbital-map-overview h1 {
+  margin: 0.8rem 0 0;
+  color: #f5f3f8;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 5vw, 5.4rem);
+  font-weight: 520;
+  letter-spacing: -0.065em;
+  line-height: 0.92;
+}
+
+.orbital-map-overview > span {
+  display: block;
+  max-width: 31ch;
+  margin-top: 1.2rem;
+  color: #aaa6b1;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.orbital-map-overview nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  pointer-events: auto;
+}
+
+.orbital-map-overview nav button {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  min-height: 46px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  padding: 0 0.35rem;
+  color: #d8d5df;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  text-align: left;
+  transition: color 260ms cubic-bezier(0.16, 1, 0.3, 1), transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orbital-map-overview nav button:nth-child(odd) {
+  margin-right: 1rem;
+}
+
+.orbital-map-overview nav button:hover,
+.orbital-map-overview nav button:focus-visible {
+  transform: translateX(4px);
+  color: #fff;
+}
+
+.orbital-map-overview nav button:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.orbital-map-overview nav small {
+  color: #787280;
+  font-size: 0.52rem;
+}
+
+.orbital-map-overview nav strong {
+  font-size: 0.6rem;
+  font-weight: 520;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.orbital-artifact-canvas[data-view='page'] {
+  pointer-events: none;
+}
+
+.orbital-artifact-canvas[data-view='page'] canvas {
+  cursor: default;
+}
+
+.static-artifact-fallback[data-view='page'] {
+  inset: 0;
+  background: #f2f1ee;
+}
+
+.static-artifact-fallback[data-view='page'] svg {
+  width: 52%;
+  height: 70%;
+  margin: 12% 0 0 48%;
+}
+
+.orbital-shell[data-network-view='page'] {
+  --page-accent: #e9964f;
+  background: #f2f1ee;
+  color: #202226;
+}
+
+.orbital-shell[data-network-view='page']::before {
+  background:
+    linear-gradient(90deg, transparent 0 49%, rgba(36, 37, 40, 0.08) 49% 49.08%, transparent 49.08%),
+    linear-gradient(rgba(31, 33, 36, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 33, 36, 0.028) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+}
+
+.orbital-shell[data-network-view='page'] .orbital-frame {
+  border-color: rgba(31, 33, 36, 0.14);
+}
+
+.orbital-shell[data-network-view='page'] .orbital-frame > i {
+  border-color: rgba(31, 33, 36, 0.42);
+}
+
+.orbital-section-page {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  color: #222429;
+  pointer-events: none;
+}
+
+.orbital-section-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+  min-height: 74px;
+  align-items: center;
+  gap: 1.25rem;
+  border-bottom: 1px solid rgba(31, 33, 36, 0.16);
+  background: rgba(242, 241, 238, 0.9);
+  padding: 0 clamp(1.2rem, 3.2vw, 3.5rem);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.orbital-section-brand,
+.orbital-section-header nav button,
+.orbital-section-actions button {
+  border: 0;
+  background: transparent;
+  color: #26282d;
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+
+.orbital-section-brand {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0;
+}
+
+.orbital-section-brand > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #303238;
+  font-size: 0.62rem;
+}
+
+.orbital-section-brand > strong {
+  font-size: 0.58rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+}
+
+.orbital-section-header nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.orbital-section-header nav button {
+  min-height: 44px;
+  padding: 0.5rem 0.62rem;
+  color: #6f7176;
+  font-size: 0.56rem;
+  transition: color 220ms ease, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orbital-section-header nav button:hover,
+.orbital-section-header nav button:focus-visible,
+.orbital-section-header nav button[aria-current='page'] {
+  color: #202226;
+}
+
+.orbital-section-header nav button[aria-current='page']::after {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin-top: 0.25rem;
+  background: var(--page-accent);
+  content: '';
+}
+
+.orbital-section-header nav button:active,
+.orbital-section-actions button:active,
+.orbital-section-brand:active {
+  transform: scale(0.98);
+}
+
+.orbital-section-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.orbital-section-actions button {
+  min-height: 42px;
+  border: 1px solid rgba(31, 33, 36, 0.26);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.54rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+}
+
+.orbital-section-actions button:hover,
+.orbital-section-actions button:focus-visible {
+  background: #25272b;
+  color: #f6f4ef;
+}
+
+.orbital-section-scroll {
+  position: fixed;
+  top: 74px;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: transparent;
+  scrollbar-color: rgba(39, 40, 44, 0.32) transparent;
+  scrollbar-width: thin;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+
+.orbital-section-copy {
+  position: relative;
+  width: min(74vw, 1120px);
+  min-height: calc(100dvh - 74px);
+  padding: clamp(2.6rem, 7vh, 5.8rem) clamp(1.6rem, 6vw, 6.5rem) 5rem;
+  background: linear-gradient(
+    90deg,
+    #f2f1ee 0%,
+    rgba(242, 241, 238, 0.99) 62%,
+    rgba(242, 241, 238, 0.9) 78%,
+    rgba(242, 241, 238, 0.36) 92%,
+    transparent 100%
+  );
+  animation: orbital-page-copy-in 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes orbital-page-copy-in {
+  from { opacity: 0; transform: translate3d(-18px, 14px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.orbital-section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 0 1.3rem;
+  color: #74767b;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.orbital-section-kicker > span {
+  color: var(--page-accent);
+}
+
+.orbital-section-copy .portfolio-panel {
+  width: 100%;
+  min-height: auto;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  color: #222429;
+  opacity: 1;
+  transform: none;
+  content-visibility: visible;
+}
+
+.orbital-section-copy .portfolio-panel::before,
+.orbital-section-copy .portfolio-panel::after,
+.orbital-section-copy .hero-beacon-label,
+.orbital-section-copy .scroll-cue,
+.orbital-section-copy .hero-readout {
+  display: none;
+}
+
+.orbital-section-copy .home-panel {
+  display: block;
+}
+
+.orbital-section-copy .home-status {
+  margin-bottom: 1.6rem;
+  color: #686a70;
+}
+
+.orbital-section-copy .status-dot {
+  background: var(--page-accent);
+  box-shadow: none;
+}
+
+.orbital-section-copy .system-label,
+.orbital-section-copy .home-role,
+.orbital-section-copy .detail-label,
+.orbital-section-copy .project-meta,
+.orbital-section-copy .journey-year,
+.orbital-section-copy .text-link {
+  color: #a85e28;
+}
+
+.orbital-section-copy .system-label span,
+.orbital-section-copy .route-target {
+  color: #a85e28;
+}
+
+.orbital-section-copy .gem,
+.orbital-section-copy .gem[data-gem] {
+  border-color: var(--page-accent);
+  background: var(--page-accent);
+  box-shadow: none;
+}
+
+.orbital-section-copy .panel-heading {
+  margin-bottom: clamp(2rem, 5vw, 3.8rem);
+}
+
+.orbital-section-copy .panel-heading h2,
+.orbital-section-copy .home-panel h1 {
+  max-width: 14ch;
+  color: #24262b;
+  font-size: clamp(2.8rem, 5vw, 5.7rem);
+  font-weight: 680;
+  letter-spacing: -0.065em;
+  line-height: 0.93;
+}
+
+.orbital-section-copy .home-tagline,
+.orbital-section-copy .panel-intro {
+  max-width: 52ch;
+  color: #4f5259;
+  font-size: clamp(1rem, 1.55vw, 1.25rem);
+  line-height: 1.62;
+}
+
+.orbital-section-copy .prose-copy,
+.orbital-section-copy .skill-cluster > p:not(.cluster-index),
+.orbital-section-copy .project-card,
+.orbital-section-copy .project-details,
+.orbital-section-copy .outcome-block,
+.orbital-section-copy .journey-list p,
+.orbital-section-copy .education-card p:not(.system-label),
+.orbital-section-copy .contact-primary > p:last-child {
+  color: #55585f;
+}
+
+.orbital-section-copy .system-card,
+.orbital-section-copy .project-card,
+.orbital-section-copy .certificate-card,
+.orbital-section-copy .contact-grid > a {
+  border-color: rgba(35, 37, 41, 0.18);
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: none;
+  color: #25272c;
+}
+
+.orbital-section-copy .about-routing button,
+.orbital-section-copy .project-rail,
+.orbital-section-copy .journey-list::before {
+  border-color: rgba(35, 37, 41, 0.16);
+  background: transparent;
+}
+
+.orbital-section-copy .about-routing button,
+.orbital-section-copy .skill-cluster li,
+.orbital-section-copy .technology-list li,
+.orbital-section-copy .project-links a,
+.orbital-section-copy .secondary-socials a {
+  color: #404248;
+}
+
+.orbital-section-copy .skill-cluster li,
+.orbital-section-copy .technology-list li {
+  border-color: rgba(169, 94, 40, 0.24);
+  background: rgba(233, 150, 79, 0.08);
+}
+
+.orbital-section-copy .action-primary {
+  border-color: var(--page-accent);
+  background: var(--page-accent);
+  color: #252321;
+}
+
+.orbital-section-copy .action-secondary {
+  border-color: rgba(35, 37, 41, 0.28);
+  background: transparent;
+  color: #292b30;
+}
+
+.orbital-section-copy .action-primary:hover,
+.orbital-section-copy .action-secondary:hover,
+.orbital-section-copy .action-primary:focus-visible,
+.orbital-section-copy .action-secondary:focus-visible {
+  transform: translateY(-2px);
+}
+
+.orbital-section-copy .action-primary:active,
+.orbital-section-copy .action-secondary:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.orbital-page-instructions {
+  position: fixed;
+  right: clamp(1.5rem, 3vw, 3rem);
+  bottom: clamp(1.3rem, 3vw, 2.5rem);
+  z-index: 3;
+  margin: 0;
+  color: rgba(35, 37, 41, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.orbital-page-instructions::before {
+  display: inline-block;
+  width: 36px;
+  height: 1px;
+  margin-right: 0.65rem;
+  background: var(--page-accent);
+  vertical-align: middle;
+  content: '';
+}
+
+@media (max-width: 980px) {
+  .orbital-section-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .orbital-section-header nav {
+    display: none;
+  }
+
+  .orbital-section-scroll {
+    width: 100%;
+  }
+
+  .orbital-section-copy {
+    width: min(78vw, 780px);
+  }
+}
+
+@media (max-width: 640px) {
+  .orbital-map-overview {
+    top: calc(env(safe-area-inset-top) + 5.5rem);
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+
+  .orbital-map-overview h1 {
+    font-size: clamp(2.4rem, 13vw, 3.7rem);
+  }
+
+  .orbital-map-overview > span {
+    max-width: 28ch;
+  }
+
+  .orbital-map-overview nav {
+    display: none;
+  }
+
+  .orbital-map-instructions {
+    bottom: calc(env(safe-area-inset-bottom) + 1.4rem);
+  }
+
+  .orbital-section-header {
+    top: env(safe-area-inset-top);
+    min-height: 62px;
+    padding: 0 1rem;
+  }
+
+  .orbital-section-brand > strong,
+  .orbital-section-actions button:last-child {
+    display: none;
+  }
+
+  .orbital-section-scroll {
+    top: calc(env(safe-area-inset-top) + 42vh);
+    right: 0;
+    bottom: 0;
+    width: auto;
+    background: #f2f1ee;
+    border-top: 1px solid rgba(35, 37, 41, 0.18);
+  }
+
+  .orbital-section-copy {
+    width: 100%;
+    min-height: 58dvh;
+    padding: 2.3rem 1.25rem 5rem;
+    background: #f2f1ee;
+  }
+
+  .orbital-section-copy .panel-heading h2,
+  .orbital-section-copy .home-panel h1 {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+
+  .orbital-section-copy .prose-grid,
+  .orbital-section-copy .skill-grid,
+  .orbital-section-copy .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .orbital-page-instructions {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbital-map-overview,
+  .orbital-section-copy {
+    animation: none;
+  }
+}
+
+/* Premium finish: calm depth, protected typography, and an authored load state. */
+.orbital-shell[data-network-view='map']::after {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 3;
+  width: min(42vw, 610px);
+  background: linear-gradient(
+    90deg,
+    #020204 0%,
+    rgba(2, 2, 4, 0.98) 43%,
+    rgba(2, 2, 4, 0.64) 70%,
+    transparent 100%
+  );
+  content: '';
+  pointer-events: none;
+}
+
+.orbital-map-overview {
+  width: min(335px, 27vw);
+}
+
+.orbital-map-overview h1 {
+  font-size: clamp(2.7rem, 4.5vw, 4.8rem);
+}
+
+.orbital-map-overview nav {
+  margin-top: 1.65rem;
+}
+
+.orbital-section-page::after {
+  position: fixed;
+  top: clamp(6rem, 12vh, 9rem);
+  right: clamp(1.8rem, 4vw, 4.5rem);
+  z-index: 0;
+  color: rgba(35, 37, 41, 0.045);
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 17vw, 17rem);
+  font-weight: 680;
+  letter-spacing: -0.08em;
+  line-height: 0.8;
+  content: attr(data-section-index);
+  pointer-events: none;
+}
+
+.orbital-section-header,
+.orbital-section-scroll,
+.orbital-page-instructions {
+  z-index: 2;
+}
+
+.orbital-section-header {
+  box-shadow: 0 12px 36px rgba(49, 43, 38, 0.025);
+}
+
+.orbital-section-copy .system-card,
+.orbital-section-copy .project-card,
+.orbital-section-copy .certificate-card,
+.orbital-section-copy .contact-grid > a {
+  transition:
+    border-color 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.orbital-section-copy .system-card:hover,
+.orbital-section-copy .project-card:hover,
+.orbital-section-copy .certificate-card:hover,
+.orbital-section-copy .contact-grid > a:hover {
+  border-color: rgba(169, 94, 40, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.orbital-loading {
+  gap: 1.1rem;
+}
+
+.orbital-loading-track {
+  display: flex;
+  width: min(220px, 54vw);
+  height: 2px;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.orbital-loading-track > span {
+  position: relative;
+  display: block;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  background: rgba(238, 245, 242, 0.12);
+}
+
+.orbital-loading-track > span::after {
+  position: absolute;
+  inset: 0;
+  background: var(--active-node-accent, var(--orbital-amber));
+  content: '';
+  transform: translateX(-105%);
+  animation: orbital-loader-track 1.65s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.orbital-loading-track > span:nth-child(2)::after {
+  animation-delay: 130ms;
+}
+
+.orbital-loading-track > span:nth-child(3)::after {
+  animation-delay: 260ms;
+}
+
+.orbital-loading > p {
+  margin: 0;
+}
+
+@keyframes orbital-loader-track {
+  0% { transform: translateX(-105%); }
+  52%, 100% { transform: translateX(105%); }
+}
+
+@media (max-width: 640px) {
+  .orbital-shell[data-network-view='map']::after {
+    inset: 0 0 auto;
+    width: 100%;
+    height: 38vh;
+    background: linear-gradient(
+      180deg,
+      #020204 0%,
+      rgba(2, 2, 4, 0.96) 52%,
+      rgba(2, 2, 4, 0.6) 78%,
+      transparent 100%
+    );
+  }
+
+  .orbital-map-overview {
+    width: auto;
+  }
+
+  .orbital-section-page::after {
+    top: calc(env(safe-area-inset-top) + 4.5rem);
+    right: 1rem;
+    font-size: 8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbital-loading-track > span::after {
+    animation: none;
+    transform: none;
+  }
+}

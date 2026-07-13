@@ -1,9 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import useWebGLSupport from '../hooks/useWebGLSupport';
 import SceneErrorBoundary from './SceneErrorBoundary';
 import StaticNodeMap from './StaticNodeMap';
 
 const PortfolioWorld = lazy(() => import('./PortfolioWorld'));
+const loadPortfolioNodeWorld = () => import('./PortfolioNodeWorld');
+const PortfolioNodeWorld = lazy(loadPortfolioNodeWorld);
 
 function useMobileViewport() {
   const [mobile, setMobile] = useState(
@@ -20,17 +22,15 @@ function useMobileViewport() {
   return mobile;
 }
 
-/**
- * The 3D network now lives entirely behind the content as a fixed cinematic
- * backdrop. It is decorative (the mini-map drives navigation), so it is hidden
- * from assistive tech and never captures pointer/scroll. As the visitor scrolls
- * the camera flies from the wide network view onto the active node.
- */
-function OrbitalLoading() {
+function OrbitalLoading({ phase }) {
   return (
     <div className="orbital-loading" role="status" aria-live="polite">
-      <span />
-      <p>Calibrating orbital assets</p>
+      <div className="orbital-loading-track" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+      <p>{phase === 'network' ? 'Indexing artifact nodes' : 'Calibrating orbital assets'}</p>
     </div>
   );
 }
@@ -42,43 +42,75 @@ export default function PortfolioWorldStage({
   rotationCommand,
   onWorldNodeSelect,
   onMapNodeSelect,
+  activeSection,
+  networkView,
 }) {
   const webGLSupported = useWebGLSupport();
   const [sceneFailed, setSceneFailed] = useState(false);
   const isMobile = useMobileViewport();
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+
+  const handleContextLost = useCallback((sourcePhase) => {
+    if (phaseRef.current === sourcePhase) setSceneFailed(true);
+  }, []);
+
+  useEffect(() => {
+    setSceneFailed(false);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== 'globe') loadPortfolioNodeWorld();
+  }, [phase]);
+
   const useStaticMap = webGLSupported === false || sceneFailed;
+  const showArtifactWorld = phase === 'arrival' || phase === 'network';
   const fallbackReason = webGLSupported === null
     ? 'checking'
     : sceneFailed
         ? 'scene-error'
         : 'no-webgl';
+  const fallback = (
+    <StaticNodeMap
+      reason={fallbackReason}
+      phase={showArtifactWorld ? 'network' : phase}
+      activeSection={activeSection}
+      viewMode={networkView}
+    />
+  );
 
   return (
-    <div
-      className="world-stage orbital-world-stage"
-      data-phase={phase}
-    >
+    <div className="world-stage orbital-world-stage" data-phase={phase}>
       <div className="world-viewport">
         {webGLSupported === null ? (
-          <OrbitalLoading />
-        ) : useStaticMap ? (
-          <StaticNodeMap reason={fallbackReason} />
-        ) : (
+          <OrbitalLoading phase={phase} />
+        ) : useStaticMap ? fallback : (
           <SceneErrorBoundary
             onError={() => setSceneFailed(true)}
-            fallback={<StaticNodeMap reason="scene-error" />}
+            fallback={fallback}
           >
-            <Suspense fallback={<OrbitalLoading />}>
-              <PortfolioWorld
-                isMobile={isMobile}
-                phase={phase}
-                worldNodes={worldNodes}
-                selectedWorldNode={selectedWorldNode}
-                rotationCommand={rotationCommand}
-                onWorldNodeSelect={onWorldNodeSelect}
-                onMapNodeSelect={onMapNodeSelect}
-                onContextLost={() => setSceneFailed(true)}
-              />
+            <Suspense fallback={<OrbitalLoading phase={phase} />}>
+              {showArtifactWorld ? (
+                <PortfolioNodeWorld
+                  phase={phase}
+                  activeSection={activeSection}
+                  viewMode={networkView}
+                  isMobile={isMobile}
+                  onNodeSelect={onMapNodeSelect}
+                  onContextLost={() => handleContextLost('network')}
+                />
+              ) : (
+                <PortfolioWorld
+                  isMobile={isMobile}
+                  phase={phase}
+                  worldNodes={worldNodes}
+                  selectedWorldNode={selectedWorldNode}
+                  rotationCommand={rotationCommand}
+                  onWorldNodeSelect={onWorldNodeSelect}
+                  onMapNodeSelect={onMapNodeSelect}
+                  onContextLost={() => handleContextLost(phase)}
+                />
+              )}
             </Suspense>
           </SceneErrorBoundary>
         )}

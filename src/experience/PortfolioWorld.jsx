@@ -25,6 +25,8 @@ const EARTH_URL = `${BASE_URL}textures/nasa-black-marble-2016.jpg`;
 const TARGETING_SECONDS = 1.9;
 const DESCENT_SECONDS = 3.2;
 const ARRIVAL_SECONDS = 0.9;
+const ENABLE_DESCENT_CLOUDS = true;
+const ENABLE_DESCENT_VELOCITY = false;
 const DESCENT_CLOUD_URLS = [
   `${BASE_URL}textures/cloud-descent-01.png`,
   `${BASE_URL}textures/cloud-descent-02.png`,
@@ -544,12 +546,10 @@ function DescentClouds({ textures, phase, reducedMotion }) {
   const materials = useRef([]);
   const phaseStart = usePhaseStart(phase);
   const setup = useMemo(() => [
-    { position: [-2.4, 1.35, 0.2], scale: [2.55, 1.65, 1], delay: 0 },
-    { position: [2.2, -1, 0.55], scale: [2.8, 1.8, 1], delay: 0.11 },
-    { position: [-0.55, 0.1, 0.9], scale: [3.15, 2.05, 1], delay: 0.23 },
-    { position: [2.45, 1.2, 0.25], scale: [2.6, 1.7, 1], delay: 0.36 },
-    { position: [-2.3, -1.15, 0.7], scale: [2.95, 1.9, 1], delay: 0.49 },
-    { position: [0.3, 0.45, 1.05], scale: [3.3, 2.15, 1], delay: 0.62 },
+    { position: [-2.7, 1.05, 0.3], scale: [2.35, 1.35, 1], delay: 0.08, drift: 0.38 },
+    { position: [2.6, -0.85, 0.5], scale: [2.55, 1.45, 1], delay: 0.2, drift: -0.34 },
+    { position: [-1.15, -1.35, 0.75], scale: [2.7, 1.5, 1], delay: 0.34, drift: 0.24 },
+    { position: [1.25, 1.25, 0.9], scale: [2.65, 1.5, 1], delay: 0.48, drift: -0.22 },
   ], []);
 
   useFrame(() => {
@@ -564,13 +564,13 @@ function DescentClouds({ textures, phase, reducedMotion }) {
       const local = THREE.MathUtils.clamp((raw - item.delay) / (1 - item.delay), 0, 1);
       const progress = easeInOutCubic(local);
       sprite.position.set(
-        item.position[0] + Math.sin(progress * Math.PI) * (index - 1) * 0.5,
-        item.position[1] + (0.5 - index * 0.2) * progress,
-        item.position[2] + progress * 4.6
+        item.position[0] + Math.sin(progress * Math.PI) * item.drift,
+        item.position[1] + (index % 2 === 0 ? 0.16 : -0.16) * progress,
+        item.position[2] + progress * 4.2
       );
-      const scale = 1 + progress * 2;
+      const scale = 1 + progress * 1.45;
       sprite.scale.set(item.scale[0] * scale, item.scale[1] * scale, 1);
-      material.opacity = Math.sin(local * Math.PI) * 0.78;
+      material.opacity = Math.sin(local * Math.PI) * 0.34;
     });
   });
 
@@ -843,6 +843,8 @@ function WorldScene({
     earthTexture.needsUpdate = true;
     descentTextures.forEach((texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
       texture.needsUpdate = true;
     });
   }, [descentTextures, earthTexture]);
@@ -871,12 +873,16 @@ function WorldScene({
         phase={phase}
         isMobile={isMobile}
       />
-      <DescentClouds
-        textures={descentTextures}
-        phase={phase}
-        reducedMotion={reducedMotion}
-      />
-      <DescentVelocity phase={phase} reducedMotion={reducedMotion} />
+      {ENABLE_DESCENT_CLOUDS ? (
+        <DescentClouds
+          textures={descentTextures}
+          phase={phase}
+          reducedMotion={reducedMotion}
+        />
+      ) : null}
+      {ENABLE_DESCENT_VELOCITY ? (
+          <DescentVelocity phase={phase} reducedMotion={reducedMotion} />
+      ) : null}
       <NetworkConstellation
         nodeTemplate={nodeTemplate}
         phase={phase}
